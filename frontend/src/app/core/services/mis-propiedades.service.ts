@@ -119,6 +119,16 @@ export interface HistorialEntry {
   descripcion: string;
 }
 
+export interface PropiedadDocumento {
+  id: number;
+  propiedad: number;
+  tipo: string;
+  nombre: string;
+  archivo: string; // URL
+  created_at: string;
+  subido_por?: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class MisPropiedadesService {
   private apiRoot = 'http://127.0.0.1:8000';
@@ -250,6 +260,24 @@ export class MisPropiedadesService {
   getHistorialPropiedad(id: number) {
     return this.http.get<HistorialEntry[]>(
       `${this.baseUrl}/propiedades/${id}/historial/`
+    );
+  }
+  
+  // --- Documentos ---
+  getDocumentos(propiedadId: number): Observable<PropiedadDocumento[]> {
+    return this.http.get<any>(`${this.baseUrl}/propiedad-documentos/?propiedad=${propiedadId}`).pipe(
+      map((resp) => {
+        const data = Array.isArray(resp) ? resp : resp.results ?? resp.data ?? [];
+        return (data || []).map((d: any) => {
+          let archivoUrl = d.archivo;
+          if (archivoUrl && !archivoUrl.startsWith('http')) {
+            // Asegurar que empiece con / si no lo tiene
+            const path = archivoUrl.startsWith('/') ? archivoUrl : `/${archivoUrl}`;
+            archivoUrl = `${this.apiRoot}${path}`;
+          }
+          return { ...d, archivo: archivoUrl };
+        });
+      })
     );
   }
 

@@ -59,11 +59,30 @@ export interface PropiedadDocumento {
   subido_por?: number;
 }
 
+export interface FotoPropiedad {
+  id: number;
+  propiedad: number;
+  url: string;
+  orden: number;
+  principal: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AdminPropiedadesService {
   private apiRoot = environment.apiUrl.replace(/\/+$/, '');
   private apiAdminRoot = `${this.apiRoot}/admin`;
-  private apiDocs = `${this.apiRoot}/propiedad-documentos`; // Endpoint público/común
+  private apiDocs = `${this.apiRoot}/propiedad-documentos`; 
+  private apiFotos = `${this.apiRoot}/propiedad-fotos`;
+  
+  // Base URL del backend (sin /api) para archivos media
+  private backendUrl = (() => {
+    try {
+      const url = new URL(this.apiRoot);
+      return url.origin;
+    } catch {
+      return 'http://127.0.0.1:8000'; // Fallback
+    }
+  })();
 
   constructor(private http: HttpClient) {}
 
@@ -130,8 +149,15 @@ export class AdminPropiedadesService {
   getDocumentos(propiedadId: number): Observable<PropiedadDocumento[]> {
     return this.http.get<any>(`${this.apiDocs}/?propiedad=${propiedadId}`).pipe(
       map((resp) => {
-        if (Array.isArray(resp)) return resp;
-        return resp?.results ?? resp?.data ?? [];
+        const data = Array.isArray(resp) ? resp : resp.results ?? resp.data ?? [];
+        return (data || []).map((d: any) => {
+          let archivoUrl = d.archivo;
+          if (archivoUrl && !archivoUrl.startsWith('http')) {
+             const path = archivoUrl.startsWith('/') ? archivoUrl : `/${archivoUrl}`;
+             archivoUrl = `${this.backendUrl}${path}`;
+          }
+          return { ...d, archivo: archivoUrl };
+        });
       })
     );
   }
@@ -143,10 +169,64 @@ export class AdminPropiedadesService {
     formData.append('tipo', tipo);
     formData.append('nombre', nombre || '');
 
-    return this.http.post<PropiedadDocumento>(`${this.apiDocs}/`, formData);
+    return this.http.post<PropiedadDocumento>(`${this.apiDocs}/`, formData).pipe(
+      map((d: any) => {
+        let archivoUrl = d.archivo;
+        if (archivoUrl && !archivoUrl.startsWith('http')) {
+           const path = archivoUrl.startsWith('/') ? archivoUrl : `/${archivoUrl}`;
+           archivoUrl = `${this.backendUrl}${path}`;
+        }
+        return { ...d, archivo: archivoUrl };
+      })
+    );
   }
 
   eliminarDocumento(docId: number): Observable<any> {
     return this.http.delete(`${this.apiDocs}/${docId}/`);
+  }
+
+  // === FOTOS ===
+  private mapearFoto(raw: any): FotoPropiedad {
+    let url = raw.url || raw.foto || '';
+    if (url && !url.startsWith('http')) {
+      const path = url.startsWith('/') ? url : `/${url}`;
+      url = `${this.backendUrl}${path}`;
+    }
+
+    return {
+      id: raw.id,
+      propiedad: raw.propiedad,
+      url: url,
+      orden: raw.orden ?? 0,
+      principal: !!raw.principal,
+    };
+  }
+
+  listarFotos(propiedadId: number): Observable<FotoPropiedad[]> {
+    return this.http.get<any>(`${this.apiFotos}/?propiedad=${propiedadId}`).pipe(
+      map((resp) => {
+        const data = Array.isArray(resp) ? resp : resp.results || resp.data || [];
+        return (data || []).map((f: any) => this.mapearFoto(f));
+      })
+    );
+  }
+
+  subirFoto(propiedadId: number, archivo: File): Observable<FotoPropiedad> {
+    const formData = new FormData();
+    formData.append('propiedad', String(propiedadId));
+    formData.append('foto', archivo);
+    formData.append('orden', '0');
+
+    return this.http.post<any>(`${this.apiFotos}/`, formData).pipe(
+      map((raw) => this.mapearFoto(raw))
+    );
+  }
+
+  eliminarFoto(fotoId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiFotos}/${fotoId}/`);
+  }
+
+  marcarFotoPrincipal(fotoId: number): Observable<any> {
+    return this.http.post<any>(`${this.apiFotos}/${fotoId}/marcar_principal/`, {});
   }
 }

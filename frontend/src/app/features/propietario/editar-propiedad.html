@@ -126,4 +126,20 @@
       </button>
     </div>
   </form>
+
+  <!-- Sección FOTOS -->
+  <app-propiedad-fotos
+    *ngIf="!cargando && !error && propiedadId"
+    [propiedadId]="propiedadId"
+    [servicio]="svc"
+    [requerido]="true"
+    (fotosCountChange)="onFotosCountChange($event)"
+  ></app-propiedad-fotos>
+
+  <!-- Documentos de la propiedad -->
+  <app-mis-documentos
+    *ngIf="!cargando && !error && propiedadId"
+    [propiedadId]="propiedadId"
+  ></app-mis-documentos>
+
 </div>

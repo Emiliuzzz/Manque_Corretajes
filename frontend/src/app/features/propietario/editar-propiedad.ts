@@ -11,11 +11,13 @@ import {
   NuevaPropiedadPayload,
 } from '../../core/services/mis-propiedades.service';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
+import { MisDocumentosComponent } from './mis-documentos';
+import { PropiedadFotosComponent } from '../../shared/components/propiedad-fotos/propiedad-fotos';
 
 @Component({
   selector: 'app-editar-propiedad',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, MisDocumentosComponent, PropiedadFotosComponent],
   templateUrl: './editar-propiedad.html',
 })
 export class EditarPropiedadComponent implements OnInit {
@@ -26,10 +28,12 @@ export class EditarPropiedadComponent implements OnInit {
 
   propiedadId!: number;
   aprobada = false;
+  
+  fotosCount = 0;
 
   constructor(
     private fb: FormBuilder,
-    private svc: MisPropiedadesService,
+    public svc: MisPropiedadesService, // Public to use in template for PropiedadFotosComponent
     private route: ActivatedRoute,
     private router: Router
   ) {}
@@ -98,11 +102,22 @@ export class EditarPropiedadComponent implements OnInit {
       },
     });
   }
+  
+  onFotosCountChange(count: number) {
+    this.fotosCount = count;
+  }
 
   onSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
+    }
+    
+    // Validación visual opcional (o bloqueo real si se requiere)
+    if (this.fotosCount === 0) {
+      if (!confirm('Esta propiedad no tiene fotos. ¿Deseas guardar los cambios de todas formas? (Nota: No será aprobada sin fotos).')) {
+        return;
+      }
     }
 
     this.enviando = true;

@@ -105,11 +105,15 @@ def _filtro_propietario_user(qs, user, propiedad_prefix="propiedad"):
     Soporta tus 2 variantes:
       - propiedad__propietario_user = user
       - propiedad__propietario__usuario = user
+      - propiedad__propietario__email = user.email (fallback)
     """
-    return qs.filter(
-        Q(**{f"{propiedad_prefix}__propietario_user": user}) |
-        Q(**{f"{propiedad_prefix}__propietario__usuario": user})
-    )
+    cond = Q(**{f"{propiedad_prefix}__propietario_user": user}) | \
+           Q(**{f"{propiedad_prefix}__propietario__usuario": user})
+
+    if user.email:
+        cond |= Q(**{f"{propiedad_prefix}__propietario__email__iexact": user.email})
+
+    return qs.filter(cond)
 
 
 # =========================

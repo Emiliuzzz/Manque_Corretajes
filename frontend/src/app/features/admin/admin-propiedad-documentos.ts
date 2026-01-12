@@ -83,20 +83,23 @@ import { AdminPropiedadesService, PropiedadDocumento } from '../../core/services
                   <span class="badge bg-secondary text-capitalize">{{ formatTipo(doc.tipo) }}</span>
                 </td>
                 <td>
-                  <a [href]="doc.archivo" target="_blank" class="text-decoration-none fw-bold text-dark">
-                    <i class="bi bi-file-earmark-text me-1"></i>
-                    {{ doc.nombre || 'Sin nombre' }}
-                  </a>
+                  <i class="bi bi-file-earmark-text me-1"></i>
+                  {{ doc.nombre || 'Sin nombre' }}
                 </td>
                 <td class="small text-muted">
                   {{ doc.created_at | date:'dd/MM/yyyy HH:mm' }}
                 </td>
                 <td>
-                  <button class="btn btn-outline-danger btn-sm" (click)="eliminar(doc)" [disabled]="deletingId === doc.id">
-                    <span *ngIf="deletingId === doc.id" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                    <i *ngIf="deletingId !== doc.id" class="bi bi-trash"></i>
-                    Eliminar
-                  </button>
+                  <div class="d-flex gap-2">
+                    <a [href]="doc.archivo" target="_blank" class="btn btn-outline-primary btn-sm">
+                      <i class="bi bi-eye"></i> Ver
+                    </a>
+                    <button class="btn btn-outline-danger btn-sm" (click)="eliminar(doc)" [disabled]="deletingId === doc.id">
+                      <span *ngIf="deletingId === doc.id" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                      <i *ngIf="deletingId !== doc.id" class="bi bi-trash"></i>
+                      Eliminar
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>

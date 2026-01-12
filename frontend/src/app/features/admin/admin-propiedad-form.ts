@@ -20,11 +20,12 @@ import {
 } from '../../core/services/admin-propiedades.service';
 
 import { AdminPropiedadDocumentosComponent } from './admin-propiedad-documentos';
+import { PropiedadFotosComponent } from '../../shared/components/propiedad-fotos/propiedad-fotos';
 
 @Component({
   standalone: true,
   selector: 'app-admin-propiedad-form',
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, AdminPropiedadDocumentosComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, AdminPropiedadDocumentosComponent, PropiedadFotosComponent],
   template: `
     <div class="container my-4">
       <h2 class="mb-3">
@@ -298,6 +299,14 @@ import { AdminPropiedadDocumentosComponent } from './admin-propiedad-documentos'
         </div>
       </form>
 
+      <!-- SECCIÓN FOTOS (Solo en modo edición) -->
+      <app-propiedad-fotos
+        *ngIf="modoEdicion && propiedadId && !cargando"
+        [propiedadId]="propiedadId"
+        [servicio]="propAdminSvc"
+        [requerido]="true"
+      ></app-propiedad-fotos>
+
       <!-- SECCIÓN DOCUMENTOS (Solo en modo edición) -->
       <app-admin-propiedad-documentos
         *ngIf="modoEdicion && propiedadId && !cargando"
@@ -322,7 +331,7 @@ export class AdminPropiedadFormComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private propSvc: PropietariosAdminService,
-    private propAdminSvc: AdminPropiedadesService,
+    public propAdminSvc: AdminPropiedadesService, // Public to use in template
     private router: Router,
     private route: ActivatedRoute,
     private location: Location,

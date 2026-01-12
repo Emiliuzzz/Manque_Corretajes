@@ -130,10 +130,11 @@ export class NuevaPropiedadComponent implements OnInit {
     const payload: NuevaPropiedadPayload = this.form.value as any;
 
     this.svc.crearPropiedad(payload).subscribe({
-      next: () => {
+      next: (resp) => {
         this.enviando = false;
         this.exito = true;
-        this.router.navigate(['/mis-propiedades']);
+        // Redirigir a editar para subir fotos
+        this.router.navigate(['/mis-propiedades/editar', resp.id]);
       },
       error: (err) => {
         console.error(err);
