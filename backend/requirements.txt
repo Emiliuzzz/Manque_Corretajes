@@ -1,0 +1,15 @@
+Django==5.2.6
+djangorestframework==3.16.1
+django-cors-headers==4.9.0
+python-dotenv==1.0.1
+whitenoise==6.7.0
+dj-database-url==2.2.0
+gunicorn==23.0.0
+psycopg[binary]==3.2.3
+PyMySQL==1.1.1
+cryptography
+Pillow==10.4.0
+python-dateutil
+djangorestframework-simplejwt
+django-filter
+django-extensions

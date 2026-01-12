@@ -1,0 +1,130 @@
+<div class="container my-4">
+  <h2>Nueva propiedad</h2>
+  <p class="text-muted">
+    La propiedad quedará registrada como
+    <strong>pendiente de aprobación</strong>. Un administrador deberá
+    revisarla antes de que aparezca en el catálogo público.
+  </p>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-3">
+
+    <!-- Propietario visible pero no editable -->
+    <div class="mb-3">
+      <label class="form-label">Propietario</label>
+      <input
+        type="text"
+        class="form-control"
+        [value]="propietarioActualNombre || 'Cargando...'"
+        disabled
+      />
+      <div class="form-text">Esta propiedad se asociará automáticamente a tu cuenta.</div>
+    </div>
+
+    <!-- Datos básicos -->
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Título</label>
+        <input type="text" class="form-control" formControlName="titulo" />
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Ciudad</label>
+        <input type="text" class="form-control" formControlName="ciudad" />
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Dirección</label>
+      <input type="text" class="form-control" formControlName="direccion" />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Descripción</label>
+      <textarea rows="3" class="form-control" formControlName="descripcion"></textarea>
+    </div>
+
+    <!-- Características -->
+    <div class="row">
+
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Tipo</label>
+        <select class="form-select" formControlName="tipo">
+          <option value="casa">Casa</option>
+          <option value="departamento">Departamento</option>
+          <option value="parcela">Parcela</option>
+          <option value="oficina">Oficina</option>
+          <option value="bodega">Bodega</option>
+          <option value="terreno">Terreno</option>
+        </select>
+      </div>
+
+      <!-- Solo se muestran para tipos que NO son parcela/terreno -->
+      <div
+        class="col-md-4 mb-3"
+        *ngIf="form.value.tipo !== 'terreno' && form.value.tipo !== 'parcela'"
+      >
+        <label class="form-label">Dormitorios</label>
+        <input type="number" class="form-control" formControlName="dormitorios" min="0" />
+      </div>
+
+      <div
+        class="col-md-4 mb-3"
+        *ngIf="form.value.tipo !== 'terreno' && form.value.tipo !== 'parcela'"
+      >
+        <label class="form-label">Baños</label>
+        <input type="number" class="form-control" formControlName="baos" min="0" />
+      </div>
+    </div>
+
+    <!-- Mensaje informativo -->
+    <div
+      class="alert alert-info"
+      *ngIf="form.value.tipo === 'terreno' || form.value.tipo === 'parcela'"
+    >
+      Esta propiedad es un <strong>terreno o parcela</strong>, por lo que no tiene dormitorios ni baños.
+    </div>
+
+    <!-- Metros, orientación, precio -->
+    <div class="row mt-3">
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Metros cuadrados</label>
+        <input type="number" class="form-control" formControlName="metros2" min="0" step="0.1" />
+      </div>
+
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Orientación</label>
+        <select class="form-select" formControlName="orientación">
+          <option value="sur">Sur</option>
+          <option value="norte">Norte</option>
+          <option value="este">Este</option>
+          <option value="oeste">Oeste</option>
+        </select>
+      </div>
+
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Precio</label>
+        <input type="number" class="form-control" formControlName="precio" min="0" step="1000" />
+      </div>
+    </div>
+
+    <!-- Botones -->
+    <div class="d-flex justify-content-end gap-2 mt-4">
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        [routerLink]="['/mis-propiedades']"
+        [disabled]="enviando"
+      >
+        Cancelar
+      </button>
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="enviando || form.invalid || cargandoPropietario"
+      >
+        {{ enviando ? 'Guardando...' : 'Guardar propiedad' }}
+      </button>
+    </div>
+  </form>
+</div>

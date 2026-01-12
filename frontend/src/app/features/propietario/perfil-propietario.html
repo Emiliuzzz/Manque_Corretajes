@@ -1,0 +1,152 @@
+<div class="container my-4">
+  <h2>Mi perfil</h2>
+  <p class="text-muted">
+    Revisa tu información de usuario y, si eres propietario, actualiza tus datos
+    personales.
+  </p>
+
+  <!-- Datos básicos de usuario -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-body">
+      <h5 class="card-title mb-3">Datos de la cuenta</h5>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Usuario</label>
+          <input
+            type="text"
+            class="form-control"
+            [value]="username"
+            disabled
+          />
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Correo electrónico</label>
+          <input type="email" class="form-control" [value]="email" disabled />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label class="form-label">Rol</label>
+          <input
+            type="text"
+            class="form-control"
+            [value]="rol || 'CLIENTE'"
+            disabled
+          />
+        </div>
+      </div>
+
+      <small class="text-muted">
+        Estos datos pertenecen a tu cuenta de acceso. El cambio de correo o rol
+        se realiza por el administrador.
+      </small>
+    </div>
+  </div>
+
+  <!-- Perfil de propietario -->
+  <div *ngIf="esPropietario" class="card shadow-sm">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="card-title mb-0">Información como propietario</h5>
+        <span *ngIf="cargandoProp" class="text-muted small">
+          Cargando datos...
+        </span>
+      </div>
+
+      <div *ngIf="errorProp" class="alert alert-danger">
+        {{ errorProp }}
+      </div>
+      <div *ngIf="exitoProp" class="alert alert-success">
+        Datos actualizados correctamente.
+      </div>
+
+      <form [formGroup]="formProp" (ngSubmit)="guardarPerfilPropietario()">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Primer nombre</label>
+            <input
+              type="text"
+              class="form-control"
+              formControlName="primer_nombre"
+            />
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Segundo nombre</label>
+            <input
+              type="text"
+              class="form-control"
+              formControlName="segundo_nombre"
+            />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Primer apellido</label>
+            <input
+              type="text"
+              class="form-control"
+              formControlName="primer_apellido"
+            />
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Segundo apellido</label>
+            <input
+              type="text"
+              class="form-control"
+              formControlName="segundo_apellido"
+            />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label class="form-label">RUT</label>
+            <input type="text" class="form-control" formControlName="rut" />
+          </div>
+
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Teléfono</label>
+            <input
+              type="text"
+              class="form-control"
+              formControlName="telefono"
+            />
+          </div>
+
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Correo de contacto</label>           
+            <input
+              type="email"
+              class="form-control"
+              formControlName="email"
+            />
+
+
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end mt-3">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="guardandoProp || formProp.invalid"
+          >
+            {{ guardandoProp ? 'Guardando...' : 'Guardar cambios' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div *ngIf="!esPropietario" class="alert alert-info mt-3">
+    Actualmente tu rol es <strong>{{ rol || 'CLIENTE' }}</strong>. Si deseas
+    registrarte como propietario, debes hacerlo a través del administrador del
+    sistema.
+  </div>
+</div>

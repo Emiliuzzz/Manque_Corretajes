@@ -1,0 +1,294 @@
+<!-- src/app/features/cliente/perfil-cliente.html -->
+<div class="container my-4">
+  <!-- Título -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h2 class="mb-0">Mi perfil de cliente</h2>
+      <p class="text-muted mb-0">
+        Revisa y actualiza tus datos, y genera nuevas solicitudes a la corredora.
+      </p>
+    </div>
+    <div class="text-end">
+      <div class="fw-semibold">{{ username }}</div>
+      <div class="text-muted small">{{ email }}</div>
+    </div>
+  </div>
+
+  <ng-container *ngIf="esCliente; else noCliente">
+    <div class="row g-4">
+      <!-- ===== Columna Perfil Cliente ===== -->
+      <div class="col-12 col-lg-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h5 class="card-title mb-3">Datos de cliente</h5>
+
+            <!-- Loading -->
+            <div *ngIf="cargandoProp" class="text-muted mb-2">
+              Cargando información...
+            </div>
+
+            <!-- Error -->
+            <div *ngIf="errorProp" class="alert alert-danger">
+              {{ errorProp }}
+            </div>
+
+            <!-- Éxito -->
+            <div *ngIf="exitoProp" class="alert alert-success">
+              Tus datos han sido actualizados correctamente.
+            </div>
+
+            <form
+              *ngIf="!cargandoProp"
+              [formGroup]="formProp"
+              (ngSubmit)="guardarPerfilPropietario()"
+              novalidate
+            >
+              <div class="row g-3">
+                <div class="col-12 col-md-6">
+                  <label class="form-label">Primer nombre</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    formControlName="primer_nombre"
+                    [class.is-invalid]="campoInvalidoProp('primer_nombre')"
+                  />
+                  <div class="invalid-feedback">
+                    Este campo es obligatorio.
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label">Segundo nombre</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    formControlName="segundo_nombre"
+                  />
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label">Primer apellido</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    formControlName="primer_apellido"
+                    [class.is-invalid]="campoInvalidoProp('primer_apellido')"
+                  />
+                  <div class="invalid-feedback">
+                    Este campo es obligatorio.
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label">Segundo apellido</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    formControlName="segundo_apellido"
+                  />
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label">RUT</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    formControlName="rut"
+                    [class.is-invalid]="campoInvalidoProp('rut')"
+                  />
+                  <div class="invalid-feedback">
+                    Este campo es obligatorio.
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label">Teléfono</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    formControlName="telefono"
+                    [class.is-invalid]="campoInvalidoProp('telefono')"
+                  />
+                  <div class="invalid-feedback">
+                    Este campo es obligatorio.
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label">Correo</label>
+                  <input
+                    type="email"
+                    class="form-control"
+                    formControlName="email"
+                  />
+                  <div class="form-text">
+                    El correo se utiliza como dato de acceso al sistema.
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-3 d-flex justify-content-end">
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  [disabled]="guardandoProp"
+                >
+                  <span *ngIf="guardandoProp">Guardando...</span>
+                  <span *ngIf="!guardandoProp">Guardar cambios</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Columna Nueva Solicitud ===== -->
+      <div class="col-12 col-lg-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h5 class="card-title mb-3">Nueva solicitud</h5>
+            <p class="text-muted small">
+              Indícanos qué tipo de propiedad buscas y en qué condiciones, para
+              que podamos contactarte con opciones.
+            </p>
+
+            <div *ngIf="errorSolicitud" class="alert alert-danger">
+              {{ errorSolicitud }}
+            </div>
+            <div *ngIf="exitoSolicitud" class="alert alert-success">
+              Tu solicitud ha sido registrada. Te contactaremos a la brevedad.
+            </div>
+
+            <form
+              [formGroup]="formSolicitud"
+              (ngSubmit)="crearSolicitud()"
+              novalidate
+            >
+              <div class="row g-3">
+                <div class="col-12 col-md-6">
+                  <label class="form-label">Tipo de operación</label>
+                  <select
+                    class="form-select"
+                    formControlName="tipo_operacion"
+                    [class.is-invalid]="campoInvalidoSolicitud('tipo_operacion')"
+                  >
+                    <option value="ARRIENDO">Arriendo</option>
+                    <option value="COMPRA">Compra</option>
+                  </select>
+                  <div class="invalid-feedback">
+                    Selecciona un tipo de operación.
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label">Tipo de propiedad</label>
+                  <select
+                    class="form-select"
+                    formControlName="tipo_propiedad"
+                    [class.is-invalid]="campoInvalidoSolicitud('tipo_propiedad')"
+                  >
+                    <option value="departamento">Departamento</option>
+                    <option value="casa">Casa</option>
+                    <option value="oficina">Oficina</option>
+                    <option value="parcela">Parcela</option>
+                  </select>
+                  <div class="invalid-feedback">
+                    Selecciona un tipo de propiedad.
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label">Ciudad</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    formControlName="ciudad"
+                    [class.is-invalid]="campoInvalidoSolicitud('ciudad')"
+                  />
+                  <div class="invalid-feedback">
+                    La ciudad es obligatoria.
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label">Comuna</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    formControlName="comuna"
+                    [class.is-invalid]="campoInvalidoSolicitud('comuna')"
+                  />
+                  <div class="invalid-feedback">
+                    La comuna es obligatoria.
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label">Presupuesto mínimo (CLP)</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    formControlName="presupuesto_min"
+                    [class.is-invalid]="campoInvalidoSolicitud('presupuesto_min')"
+                  />
+                  <div class="invalid-feedback">
+                    Ingresa un número válido.
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label">Presupuesto máximo (CLP)</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    formControlName="presupuesto_max"
+                    [class.is-invalid]="campoInvalidoSolicitud('presupuesto_max')"
+                  />
+                  <div class="invalid-feedback">
+                    Ingresa un número válido.
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label">Detalles adicionales</label>
+                  <textarea
+                    rows="4"
+                    class="form-control"
+                    formControlName="mensaje"
+                    [class.is-invalid]="campoInvalidoSolicitud('mensaje')"
+                  ></textarea>
+                  <div class="invalid-feedback">
+                    Describe brevemente qué estás buscando (mínimo 10
+                    caracteres).
+                  </div>
+                  <div class="form-text">
+                    Ej: “Busco depto en Talca centro, 2 dormitorios, cercano a
+                    locomoción, máx 350.000”.
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-3 d-flex justify-content-end">
+                <button
+                  type="submit"
+                  class="btn btn-success"
+                  [disabled]="creandoSolicitud"
+                >
+                  <span *ngIf="creandoSolicitud">Enviando...</span>
+                  <span *ngIf="!creandoSolicitud">Enviar solicitud</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-template #noCliente>
+    <div class="alert alert-info mt-3">
+      Tu usuario no tiene rol de cliente. Si crees que esto es un error, por
+      favor contacta a la administración de la corredora.
+    </div>
+  </ng-template>
+</div>

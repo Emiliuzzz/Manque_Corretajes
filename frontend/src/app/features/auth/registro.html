@@ -1,0 +1,108 @@
+<div class="container my-5" style="max-width: 480px;">
+  <h2 class="text-center mb-3">Registro de usuario</h2>
+
+  <p class="text-muted text-center mb-4">
+    Crea tu cuenta para utilizar el sistema de gestión de propiedades Manque
+    Corretajes.
+  </p>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+
+      <!-- Nombre -->
+      <div class="mb-3">
+        <label class="form-label">Nombre completo <span class="text-danger">*</span></label>
+        <input
+          type="text"
+          class="form-control"
+          [(ngModel)]="form.nombre"
+          name="nombre"
+          placeholder="Ej: Juan Pérez González"
+          required
+        />
+      </div>
+
+      <!-- RUT -->
+      <div class="mb-3">
+        <label class="form-label">RUT <span class="text-danger">*</span></label>
+        <input
+          type="text"
+          class="form-control"
+          [class.is-invalid]="rutError"
+          [(ngModel)]="form.rut"
+          (ngModelChange)="onRutChange()"
+          name="rut"
+          placeholder="12.345.678-9"
+          required
+        />
+        <div *ngIf="rutError" class="invalid-feedback">
+          {{ rutError }}
+        </div>
+        <div class="form-text">Ingresa tu RUT con guion y dígito verificador.</div>
+      </div>
+
+      <!-- Telefono -->
+      <div class="mb-3">
+        <label class="form-label">Teléfono</label>
+        <input
+          type="tel"
+          class="form-control"
+          [(ngModel)]="form.telefono"
+          name="telefono"
+          placeholder="+56912345678"
+        />
+        <div class="form-text">Formato: +56912345678</div>
+      </div>
+
+      <!-- Email -->
+      <div class="mb-3">
+        <label class="form-label">Correo electrónico <span class="text-danger">*</span></label>
+        <input
+          type="email"
+          class="form-control"
+          [(ngModel)]="form.email"
+          name="email"
+          placeholder="ejemplo@correo.cl"
+          required
+        />
+      </div>
+
+      <!-- Password -->
+      <div class="mb-3">
+        <label class="form-label">Contraseña <span class="text-danger">*</span></label>
+        <input
+          type="password"
+          class="form-control"
+          [(ngModel)]="form.password"
+          name="password"
+          placeholder="Mínimo 6 caracteres"
+          required
+        />
+        <div class="form-text">
+          La contraseña debe tener al menos 6 caracteres.
+        </div>
+      </div>
+
+      <!-- Mensaje de error -->
+      <div *ngIf="errorMsg" class="alert alert-danger py-2">
+        {{ errorMsg }}
+      </div>
+
+      <!-- Botón -->
+      <button
+        type="button"
+        class="btn btn-success w-100"
+        [disabled]="loading"
+        (click)="registrar()"
+      >
+        <span *ngIf="!loading">Crear cuenta</span>
+        <span *ngIf="loading">Creando cuenta...</span>
+      </button>
+    </div>
+  </div>
+
+  <p class="text-center mt-3">
+    ¿Ya tienes cuenta?
+    <a routerLink="/login">Inicia sesión aquí</a>
+  </p>
+</div>

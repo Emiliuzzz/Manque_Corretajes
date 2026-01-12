@@ -1,0 +1,46 @@
+<div class="container py-4">
+  <h2 class="mb-3">Mis Contratos</h2>
+
+  <div *ngIf="cargando" class="alert alert-info">Cargando contratos...</div>
+  <div *ngIf="!cargando && error" class="alert alert-danger">{{ error }}</div>
+
+  <div class="card shadow-sm" *ngIf="!cargando && !error">
+    <div class="card-body">
+      <div *ngIf="contratos.length; else sinContratos">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Propiedad</th>
+                <th>Tipo</th>
+                <th>Fecha Firma</th>
+                <th>Precio</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let c of contratos; trackBy: trackById">
+                <td>
+                  <div class="fw-semibold">{{ c.propiedad?.titulo || '-' }}</div>
+                  <div class="text-muted small">{{ c.propiedad?.ciudad || '' }}</div>
+                </td>
+                <td>{{ c.tipo_display || c.tipo }}</td>
+                <td>{{ c.fecha_firma | date:'mediumDate' }}</td>
+                <td>${{ c.precio_pactado | number:'1.0-0' }}</td>
+                <td>
+                  <span class="badge" [ngClass]="c.vigente ? 'text-bg-success' : 'text-bg-secondary'">
+                    {{ c.vigente ? 'Vigente' : 'Finalizado' }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <ng-template #sinContratos>
+        <div class="text-muted text-center py-4">No tienes contratos registrados.</div>
+      </ng-template>
+    </div>
+  </div>
+</div>

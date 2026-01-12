@@ -1,0 +1,40 @@
+<div class="container my-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Historial de cambios</h2>
+    <button class="btn btn-outline-secondary btn-sm" (click)="volver()">
+      Volver a mis propiedades
+    </button>
+  </div>
+
+  <div *ngIf="cargando" class="text-muted">Cargando historial...</div>
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <table
+    *ngIf="!cargando && !error && historial.length > 0"
+    class="table table-striped table-hover"
+  >
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Acción</th>
+        <th>Descripción</th>
+        <th>Usuario</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let h of historial">
+        <td>{{ h.fecha | date: 'dd/MM/yyyy HH:mm' }}</td>
+        <td>{{ h.accion }}</td>
+        <td>{{ h.descripcion }}</td>
+        <td>{{ h.usuario || 'Sistema' }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p
+    *ngIf="!cargando && !error && historial.length === 0"
+    class="text-muted mt-3"
+  >
+    Esta propiedad aún no tiene cambios registrados en el historial.
+  </p>
+</div>

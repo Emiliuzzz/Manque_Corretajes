@@ -1,0 +1,530 @@
+<div class="container my-4">
+  <!-- Título -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h2 class="mb-0">Mis solicitudes</h2>
+      <p class="text-muted mb-0">
+        Revisa el estado de tus reservas, contratos y pagos.
+      </p>
+    </div>
+
+    <!-- Botón para crear nueva solicitud -->
+    <div>
+      <a
+        class="btn btn-outline-primary"
+        routerLink="/perfil"
+      >
+        Nueva solicitud
+      </a>
+    </div>
+  </div>
+
+
+  <!-- Tarjetas resumen -->
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-md-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h6 class="card-subtitle mb-2 text-muted">Reservas activas</h6>
+          <h3 class="card-title mb-0">{{ totalReservasActivas }}</h3>
+          <small class="text-muted">pendientes o en revisión</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h6 class="card-subtitle mb-2 text-muted">Contratos vigentes</h6>
+          <h3 class="card-title mb-0">{{ totalContratosVigentes }}</h3>
+          <small class="text-muted">arriendos o compras en curso</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h6 class="card-subtitle mb-2 text-muted">Pagos registrados</h6>
+          <h3 class="card-title mb-0">{{ totalPagos }}</h3>
+          <small class="text-muted">pagos asociados a tus contratos</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h6 class="card-subtitle mb-2 text-muted">Solicitudes de búsqueda</h6>
+          <h3 class="card-title mb-0">{{ totalSolicitudes }}</h3>
+          <small class="text-muted">enviadas al sistema</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- Tabs -->
+  <ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+      <button
+        class="nav-link"
+        [class.active]="activeTab === 'reservas'"
+        (click)="setTab('reservas')"
+        type="button"
+      >
+        Reservas
+      </button>
+    </li>
+    <li class="nav-item">
+      <button
+        class="nav-link"
+        [class.active]="activeTab === 'contratos'"
+        (click)="setTab('contratos')"
+        type="button"
+      >
+        Contratos
+      </button>
+    </li>
+    <li class="nav-item">
+      <button
+        class="nav-link"
+        [class.active]="activeTab === 'pagos'"
+        (click)="setTab('pagos')"
+        type="button"
+      >
+        Pagos
+      </button>
+    </li>
+    <li class="nav-item">
+      <button
+        class="nav-link"
+        [class.active]="activeTab === 'solicitudes'"
+        (click)="setTab('solicitudes')"
+      >
+        Solicitudes
+      </button>
+    </li>
+  </ul>
+
+  
+
+
+<!-- ============ TAB RESERVAS ============ -->
+  <div *ngIf="activeTab === 'reservas'">
+
+    <!-- Filtros Reservas -->
+    <div class="card mb-3 shadow-sm">
+      <div class="card-body">
+        <div class="row g-2 align-items-end">
+          <div class="col-12 col-md-3">
+            <label class="form-label">Estado</label>
+            <select
+              class="form-select"
+              [(ngModel)]="filtrosReservas.estado"
+              name="estadoReserva"
+            >
+              <option value="">Todos</option>
+              <option value="pendiente">Pendiente</option>
+              <option value="confirmada">Confirmada</option>
+              <option value="cancelada">Cancelada</option>
+              <option value="expirada">Expirada</option>
+            </select>
+          </div>
+
+          <div class="col-12 col-md-3">
+            <label class="form-label">Buscar</label>
+            <input
+              class="form-control"
+              type="text"
+              [(ngModel)]="filtrosReservas.search"
+              name="searchReserva"
+              placeholder="Ej: casa, talca, bodega..."
+            />
+          </div>
+
+          <div class="col-6 col-md-2">
+            <label class="form-label">Desde</label>
+            <input
+              class="form-control"
+              type="date"
+              [(ngModel)]="filtrosReservas.desde"
+              name="desdeReserva"
+            />
+          </div>
+
+          <div class="col-6 col-md-2">
+            <label class="form-label">Hasta</label>
+            <input
+              class="form-control"
+              type="date"
+              [(ngModel)]="filtrosReservas.hasta"
+              name="hastaReserva"
+            />
+          </div>
+
+          <div class="col-6 col-md-1 d-grid">
+            <button
+              class="btn btn-primary"
+              type="button"
+              (click)="aplicarFiltrosReservas()"
+            >
+              Filtrar
+            </button>
+          </div>
+
+          <div class="col-6 col-md-1 d-grid">
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              (click)="limpiarFiltrosReservas()"
+            >
+              Limpiar
+            </button>
+          </div>
+        </div>
+
+        <small class="text-muted d-block mt-2">
+          Puedes filtrar por estado, rango de fechas (creación) y búsqueda por propiedad/ciudad/tipo/código.
+        </small>
+      </div>
+    </div>
+
+    <div *ngIf="cargandoReservas" class="text-muted mb-2">
+      Cargando reservas...
+    </div>
+
+    <div *ngIf="!cargandoReservas && reservas.length === 0 && !errorReservas" class="alert alert-info">
+      No se encontraron reservas con esos filtros.
+    </div>
+
+    <div *ngIf="errorReservas" class="alert alert-danger">
+      {{ errorReservas }}
+    </div>
+
+    <div class="table-responsive" *ngIf="!cargandoReservas && reservas.length > 0">
+      <table class="table table-striped align-middle">
+        <thead class="table-light">
+          <tr>
+            <th style="width: 120px;">Acciones</th>
+            <th>Propiedad</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th class="text-end">Monto reserva</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let r of reservas">
+            <td>
+              <button
+                class="btn btn-sm btn-outline-danger"
+                *ngIf="r.estado_reserva === 'pendiente'"
+                (click)="cancelar(r)"
+              >
+                Cancelar
+              </button>
+              <span class="text-muted" *ngIf="r.estado_reserva !== 'pendiente'">—</span>
+            </td>
+
+            <td>
+              <div class="fw-semibold">{{ r.propiedad.titulo }}</div>
+              <div class="text-muted small">
+                {{ r.propiedad.ciudad }} • {{ r.propiedad.tipo | titlecase }}
+              </div>
+            </td>
+
+            <td>
+              {{ r.fecha | date: 'short' }}
+              <div class="text-muted small" *ngIf="r.expires_at">
+                Vence: {{ r.expires_at | date: 'short' }}
+              </div>
+            </td>
+
+            <td>
+              <span
+                class="badge"
+                [ngClass]="{
+                  'bg-warning text-dark': r.estado_reserva === 'pendiente',
+                  'bg-success': r.estado_reserva === 'confirmada',
+                  'bg-dark': r.estado_reserva === 'expirada',
+                  'bg-secondary': r.estado_reserva === 'cancelada'
+                }"
+              >
+                {{ r.estado_reserva | titlecase }}
+              </span>
+            </td>
+
+            <td class="text-end">
+              {{ r.monto_reserva | currency: 'CLP':'symbol-narrow' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+
+
+  <!-- ============ TAB CONTRATOS ============ -->
+  <div *ngIf="activeTab === 'contratos'">
+    <div *ngIf="cargandoContratos" class="text-muted mb-2">
+      Cargando contratos...
+    </div>
+
+    <div
+      *ngIf="!cargandoContratos && contratos.length === 0 && !errorContratos"
+      class="alert alert-info"
+    >
+      No tienes contratos vigentes ni históricos registrados.
+    </div>
+
+    <div *ngIf="errorContratos" class="alert alert-danger">
+      {{ errorContratos }}
+    </div>
+
+    <div
+      class="table-responsive"
+      *ngIf="!cargandoContratos && contratos.length > 0"
+    >
+      <table class="table table-striped align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Propiedad</th>
+            <th>Fecha firma</th>
+            <th class="text-end">Precio pactado</th>
+            <th class="text-end">Pagado</th>
+            <th class="text-end">Saldo</th>
+            <th>Contrato</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of contratos">
+            <td>
+              <div class="fw-semibold">{{ c.propiedad.titulo }}</div>
+              <div class="text-muted small">
+                {{ c.propiedad.ciudad }} • {{ c.propiedad.tipo | titlecase }}
+              </div>
+            </td>
+            <td>{{ c.fecha_firma | date }}</td>
+            <td class="text-end">
+              {{ c.precio_pactado | currency: 'CLP':'symbol-narrow' }}
+            </td>
+            <td class="text-end">
+              {{ c.total_pagos | currency: 'CLP':'symbol-narrow' }}
+            </td>
+            <td class="text-end">
+              {{ c.saldo | currency: 'CLP':'symbol-narrow' }}
+            </td>
+            <td>
+              <ng-container *ngIf="c.archivo_pdf_url; else sinContrato">
+                <a
+                  [href]="c.archivo_pdf_url"
+                  target="_blank"
+                  rel="noopener"
+                  class="btn btn-sm btn-outline-primary"
+                >
+                  Ver PDF
+                </a>
+              </ng-container>
+              <ng-template #sinContrato>
+                <span class="text-muted small">Sin archivo adjunto</span>
+              </ng-template>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============ TAB PAGOS ============ -->
+  <div *ngIf="activeTab === 'pagos'">
+    <div *ngIf="cargandoPagos" class="text-muted mb-2">
+      Cargando pagos...
+    </div>
+
+    <div
+      *ngIf="!cargandoPagos && pagos.length === 0 && !errorPagos"
+      class="alert alert-info"
+    >
+      Todavía no se han registrado pagos asociados a tus contratos.
+    </div>
+
+    <div *ngIf="errorPagos" class="alert alert-danger">
+      {{ errorPagos }}
+    </div>
+
+    <div
+      class="table-responsive"
+      *ngIf="!cargandoPagos && pagos.length > 0"
+    >
+      <table class="table table-striped align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Propiedad</th>
+            <th>Fecha</th>
+            <th>Medio</th>
+            <th class="text-end">Monto</th>
+            <th>Comprobante</th>
+            <th>Notas</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of pagos">
+            <td>
+              <div class="fw-semibold">
+                {{ p.propiedad?.titulo || 'Propiedad' }}
+              </div>
+              <div class="text-muted small" *ngIf="p.propiedad">
+                {{ p.propiedad.ciudad }} • {{ p.propiedad.tipo | titlecase }}
+              </div>
+            </td>
+            <td>{{ p.fecha | date }}</td>
+            <td>{{ p.medio | titlecase }}</td>
+            <td class="text-end">
+              {{ p.monto | currency: 'CLP':'symbol-narrow' }}
+            </td>
+            <td>
+              <ng-container *ngIf="p.comprobante_url; else sinComprobante">
+                <a
+                  [href]="p.comprobante_url"
+                  target="_blank"
+                  rel="noopener"
+                  class="btn btn-sm btn-outline-secondary"
+                >
+                  Ver comprobante
+                </a>
+              </ng-container>
+              <ng-template #sinComprobante>
+                <span class="text-muted small">Sin comprobante</span>
+              </ng-template>
+            </td>
+            <td>{{ p.notas || '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB SOLICITUDES -->
+  <div class="mt-3" *ngIf="activeTab === 'solicitudes'">
+
+    <div class="card mb-3 shadow-sm">
+      <div class="card-body">
+        <div class="row g-2 align-items-end">
+          <div class="col-12 col-md-4">
+            <label class="form-label">Estado</label>
+            <select class="form-select" [(ngModel)]="filtros.estado">
+              <option value="">Todos</option>
+              <option value="nueva">Nueva</option>
+              <option value="en_proceso">En proceso</option>
+              <option value="respondida">Respondida</option>
+              <option value="cerrada">Cerrada</option>
+            </select>
+          </div>
+
+          <div class="col-6 col-md-3">
+            <label class="form-label">Desde</label>
+            <input class="form-control" type="date" [(ngModel)]="filtros.desde" />
+          </div>
+
+          <div class="col-6 col-md-3">
+            <label class="form-label">Hasta</label>
+            <input class="form-control" type="date" [(ngModel)]="filtros.hasta" />
+          </div>
+
+          <div class="col-12 col-md-2 d-grid">
+            <button class="btn btn-primary" type="button" (click)="aplicarFiltrosSolicitudes()">
+              Filtrar
+            </button>
+          </div>
+
+          <div class="col-12 col-md-2 d-grid">
+            <button class="btn btn-outline-secondary" type="button" (click)="limpiarFiltrosSolicitudes()">
+              Limpiar
+            </button>
+          </div>
+        </div>
+
+        <small class="text-muted d-block mt-2">
+          Solo ves solicitudes asociadas a tu cuenta. Los filtros se combinan (estado AND fecha).
+        </small>
+      </div>
+    </div>
+
+    <div *ngIf="cargandoSolicitudes" class="alert alert-info">
+      Cargando solicitudes...
+    </div>
+
+    <div *ngIf="errorSolicitudes" class="alert alert-danger">
+      {{ errorSolicitudes }}
+    </div>
+
+    <div
+      *ngIf="!cargandoSolicitudes && !errorSolicitudes && solicitudes.length === 0"
+      class="alert alert-info"
+    >
+      No se encontraron solicitudes con esos filtros.
+    </div>
+
+    <div class="table-responsive" *ngIf="!cargandoSolicitudes && solicitudes.length > 0">
+      <table class="table table-striped align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Operación / Propiedad</th>
+            <th>Ubicación</th>
+            <th>Presupuesto</th>
+            <th>Estado</th>
+            <th>Creada</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of solicitudes">
+            <td>
+              {{ s.tipo_operacion }} · {{ s.tipo_propiedad }}
+              <div class="text-muted small">
+                {{
+                  (s.mensaje || '').length > 60
+                    ? (s.mensaje | slice : 0 : 60) + '...'
+                    : s.mensaje
+                }}
+              </div>
+            </td>
+            <td>
+              {{ s.ciudad }}<br />
+              <span class="text-muted small">{{ s.comuna }}</span>
+            </td>
+            <td>
+              <ng-container *ngIf="s.presupuesto_min || s.presupuesto_max; else noPres">
+                <div *ngIf="s.presupuesto_min">
+                  Min: {{ s.presupuesto_min | currency : 'CLP' : 'symbol-narrow' }}
+                </div>
+                <div *ngIf="s.presupuesto_max">
+                  Max: {{ s.presupuesto_max | currency : 'CLP' : 'symbol-narrow' }}
+                </div>
+              </ng-container>
+              <ng-template #noPres>
+                <span class="text-muted small">No especificado</span>
+              </ng-template>
+            </td>
+            <td>
+              <span
+                class="badge"
+                [ngClass]="{
+                  'bg-secondary': s.estado === 'nueva',
+                  'bg-info': s.estado === 'en_proceso',
+                  'bg-success': s.estado === 'respondida',
+                  'bg-dark': s.estado === 'cerrada'
+                }"
+              >
+                {{ s.estado | titlecase }}
+              </span>
+            </td>
+            <td>{{ s.created_at | date:'dd-MM-yyyy, HH:mm' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+</div>
+</div>

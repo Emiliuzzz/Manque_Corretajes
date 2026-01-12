@@ -1,0 +1,141 @@
+<div class="container py-4">
+  <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+    <div>
+      <h2 class="mb-1">Contratos y pagos</h2>
+      <div class="text-muted">Gestión completa de contratos, documentos, pagos y cuotas.</div>
+    </div>
+
+    <button type="button" class="btn btn-primary" (click)="irNuevo()">+ Nuevo contrato</button>
+    <button class="btn btn-outline-secondary" (click)="volverPanel()">
+      ← Volver al panel
+    </button>
+  </div>
+
+  <!-- filtros -->
+  <div class="card mt-3">
+    <div class="card-body">
+      <div class="row g-2 align-items-end">
+        <div class="col-12 col-md-4">
+          <label class="form-label">Buscar</label>
+          <input class="form-control" [(ngModel)]="q" placeholder="Propiedad, cliente, rut,..." />
+        </div>
+
+        <div class="col-6 col-md-2"> 
+          <label class="form-label">Tipo</label>
+          <select class="form-select" [(ngModel)]="tipo">
+            <option value="">Todos</option>
+            <option value="arriendo">Arriendo</option>
+            <option value="venta">Venta</option>
+          </select>
+        </div>
+
+        <div class="col-6 col-md-2">
+          <label class="form-label">Vigencia</label>
+          <select class="form-select" [(ngModel)]="vigente">
+            <option value="true">Vigentes</option>
+            <option value="false">Finalizados</option>
+            <option value="all">Todos</option>
+          </select>
+        </div>
+
+        <div class="col-12 col-md-2">
+          <label class="form-label">Orden</label>
+          <select class="form-select" [(ngModel)]="order">
+            <option value="-fecha_firma">Fecha (desc)</option>
+            <option value="fecha_firma">Fecha (asc)</option>
+            <option value="-precio_pactado">Precio (desc)</option>
+            <option value="precio_pactado">Precio (asc)</option>
+          </select>
+        </div>
+
+        <div class="col-12 col-md-2 d-grid d-md-flex gap-2">
+          <button type="button" class="btn btn-outline-primary w-100" (click)="aplicar()">Aplicar</button>
+          <button type="button" class="btn btn-outline-secondary w-100" (click)="limpiar()">Limpiar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- estado -->
+  <div class="mt-3" *ngIf="cargando">Cargando...</div>
+  <div class="mt-3 text-danger" *ngIf="!cargando && error">{{ error }}</div>
+
+  <!-- tabla -->
+  <div class="card mt-3" *ngIf="!cargando && !error">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+        <div class="text-muted">
+          Mostrando {{ contratos.length }} de {{ total }}
+        </div>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="prev()">←</button>
+          <span class="small align-self-center">Página {{ page }}</span>
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="next()">→</button>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th>Propiedad</th>
+              <th>Cliente</th>
+              <th style="width:120px;">Tipo</th>
+              <th style="width:140px;">Fecha</th>
+              <th style="width:140px;">Precio</th>
+              <th style="width:110px;">Vigente</th>
+              <th style="width:220px;"></th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let c of contratos">
+
+              <td>
+                <div class="fw-semibold">{{ c.propiedad?.titulo || '-' }}</div>
+                <div class="text-muted small">
+                  {{ c.propiedad?.ciudad || '' }} {{ c.propiedad?.tipo ? '• ' + c.propiedad?.tipo : '' }}
+                </div>
+              </td>
+
+              <td>
+                <div class="fw-semibold">{{ c.comprador_arrendatario?.nombre_completo || 'Sin nombre' }}</div>
+                <div class="text-muted small">{{ c.comprador_arrendatario?.rut || '' }}</div>
+              </td>
+
+              <td>{{ c.tipo_display || c.tipo }}</td>
+
+              <td>{{ c.fecha_firma | date:'mediumDate' }}</td>
+
+              <td>${{ c.precio_pactado | number:'1.0-0' }}</td>
+
+              <td>
+                <span class="badge" [ngClass]="c.vigente ? 'text-bg-success' : 'text-bg-secondary'">
+                  {{ c.vigente ? 'Sí' : 'No' }}
+                </span>
+              </td>
+
+              <td class="text-end">
+                <button
+                  type="button"
+                  class="btn btn-outline-primary"
+                  [routerLink]="['/admin/contratos', c.id]"
+                  [queryParams]="returnTo ? { returnTo: returnTo } : null"
+                >
+                  Ver / editar
+                </button>
+                <button type="button" class="btn btn-outline-danger btn-sm ms-2" *ngIf="c.vigente" (click)="finalizar(c.id)">
+                  Finalizar
+                </button>
+              </td>
+            </tr>
+
+            <tr *ngIf="contratos.length === 0">
+              <td colspan="7" class="text-center text-muted py-4">No hay contratos con esos filtros.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,390 @@
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+    <div>
+      <h2 class="mb-1">
+        {{ creando ? 'Nuevo contrato' : ('Contrato #' + id) }}
+      </h2>
+
+      <div class="text-muted" *ngIf="!creando && contrato">
+        {{ contrato.propiedad?.titulo }} •
+        {{ contrato.comprador_arrendatario?.nombre_completo || 'Sin nombre' }}
+      </div>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-secondary" type="button" (click)="volverAtras()">
+        ← Volver
+      </button>
+      <a
+        *ngIf="contrato?.archivo_pdf_url"
+        class="btn btn-outline-primary"
+        [href]="contrato.archivo_pdf_url"
+        target="_blank"
+      >
+        Ver PDF
+      </a>
+      <button type="button" class="btn btn-primary" (click)="guardarContrato()">Guardar</button>
+    </div>
+  </div>
+
+  <div *ngIf="cargando" class="mt-3">Cargando...</div>
+  <div *ngIf="!cargando && error" class="mt-3 text-danger">{{ error }}</div>
+
+  <!-- form contrato -->
+  <div class="card mt-3" *ngIf="!cargando && !error">
+    <div class="card-body">
+      <div class="row g-2">
+        <div class="col-12 col-md-2">
+          <label class="form-label">Tipo</label>
+          <select class="form-select" [(ngModel)]="form.tipo">
+            <option value="arriendo">Arriendo</option>
+            <option value="venta">Venta</option>
+          </select>
+        </div>
+
+        <div class="col-12 col-md-5">
+          <label class="form-label">Propiedad</label>
+
+          <!-- CREANDO: select -->
+          <select *ngIf="creando" class="form-select" [(ngModel)]="form.propiedad_id">
+            <option [ngValue]="null">-- Selecciona --</option>
+            <option *ngFor="let p of propiedades" [ngValue]="p.id">
+              {{ p.titulo }} • {{ p.ciudad }} • {{ p.tipo }}
+            </option>
+          </select>
+
+          <!-- EDITANDO: bloqueado -->
+          <input *ngIf="!creando" class="form-control" [value]="contrato?.propiedad?.titulo || '-' " disabled />
+        </div>
+
+        <div class="col-12 col-md-5">
+          <label class="form-label">Cliente (Interesado)</label>
+
+          <!-- CREANDO: select -->
+          <select *ngIf="creando" class="form-select" [(ngModel)]="form.comprador_arrendatario_id">
+            <option [ngValue]="null">-- Selecciona --</option>
+            <option *ngFor="let i of interesados" [ngValue]="i.id">
+              {{ i.nombre_completo || 'Sin nombre' }} • {{ i.rut }}
+            </option>
+          </select>
+
+          <!-- EDITANDO: bloqueado -->
+          <input
+            *ngIf="!creando"
+            class="form-control"
+            [value]="(contrato?.comprador_arrendatario?.nombre_completo || 'Sin nombre') + ' • ' + (contrato?.comprador_arrendatario?.rut || '')"
+            disabled
+          />
+        </div>
+
+        <div class="col-6 col-md-2">
+          <label class="form-label">Fecha firma</label>
+          <input class="form-control" type="date" [(ngModel)]="form.fecha_firma" />
+        </div>
+
+        <div class="col-6 col-md-2">
+          <label class="form-label">Precio pactado</label>
+          <input class="form-control" type="number" [(ngModel)]="form.precio_pactado" />
+        </div>
+
+        <div class="col-12 col-md-3">
+          <label class="form-label">PDF contrato (opcional)</label>
+          <input class="form-control" type="file" (change)="onFileContratoPdf($event)" />
+        </div>
+
+        <div class="col-12 col-md-2">
+          <label class="form-label">Vigente</label>
+          <select class="form-select" [(ngModel)]="form.vigente">
+            <option [ngValue]="true">Sí</option>
+            <option [ngValue]="false">No</option>
+          </select>
+        </div>
+
+        <div class="col-12 col-md-7" *ngIf="contrato">
+          <div class="row g-2">
+            <div class="col-4">
+              <div class="p-2 border rounded">
+                <div class="small text-muted">Total pagos</div>
+                <div class="fw-semibold">
+                  ${{ (contrato.total_pagos || 0) | number:'1.0-0' }}
+                </div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="p-2 border rounded">
+                <div class="small text-muted">Saldo</div>
+                <div class="fw-semibold">
+                  ${{ (contrato.saldo || 0) | number:'1.0-0' }}
+                </div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="p-2 border rounded">
+                <div class="small text-muted">Estado</div>
+                <div class="fw-semibold">{{ contrato.vigente ? 'Vigente' : 'Finalizado' }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- tabs -->
+      <ul class="nav nav-tabs mt-3">
+        <li class="nav-item">
+          <button type="button" class="nav-link" [class.active]="tab==='detalle'" (click)="tab='detalle'">Resumen</button>
+        </li>
+        <li class="nav-item">
+          <button type="button" class="nav-link" [class.active]="tab==='pagos'" (click)="tab='pagos'">Pagos</button>
+        </li>
+        <li class="nav-item">
+          <button type="button" class="nav-link" [class.active]="tab==='docs'" (click)="tab='docs'">Documentos</button>
+        </li>
+        <li class="nav-item">
+          <button type="button" class="nav-link" [class.active]="tab==='cuotas'" (click)="tab='cuotas'">Cuotas</button>
+        </li>
+      </ul>
+
+      <!-- RESUMEN -->
+      <div class="pt-3" *ngIf="tab==='detalle'">
+        <div class="alert alert-info mb-0">
+          Tip: si estás creando, primero guarda para que se habiliten pagos/documentos/cuotas.
+        </div>
+      </div>
+
+      <!-- PAGOS -->
+      <div class="pt-3" *ngIf="tab==='pagos'">
+        <div class="row g-2 align-items-end">
+          <div class="col-6 col-md-2">
+            <label class="form-label">Fecha</label>
+            <input class="form-control" type="date" [(ngModel)]="pago.fecha" />
+          </div>
+          <div class="col-6 col-md-2">
+            <label class="form-label">Monto</label>
+            <input class="form-control" type="number" [(ngModel)]="pago.monto" />
+          </div>
+          <div class="col-12 col-md-2">
+            <label class="form-label">Medio</label>
+            <select class="form-select" [(ngModel)]="pago.medio">
+              <option value="transferencia">Transferencia</option>
+              <option value="efectivo">Efectivo</option>
+              <option value="tarjeta_debito">Tarjeta débito</option>
+              <option value="tarjeta_credito">Tarjeta crédito</option>
+              <option value="webpay">Webpay</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          <div class="col-12 col-md-3">
+            <label class="form-label">Comprobante</label>
+            <input class="form-control" type="file" (change)="onFilePago($event)" />
+          </div>
+          <div class="col-12 col-md-3">
+            <label class="form-label">Notas</label>
+            <input class="form-control" [(ngModel)]="pago.notas" placeholder="Obligatorio" />
+          </div>
+
+          <div class="col-12 d-grid">
+            <button type="button" class="btn btn-primary" [disabled]="creando" (click)="crearPago()">Registrar pago</button>
+          </div>
+        </div>
+
+        <hr />
+
+        <div *ngIf="cargandoPagos">Cargando pagos...</div>
+
+        <div class="table-responsive" *ngIf="!cargandoPagos">
+          <table class="table table-striped align-middle">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Monto</th>
+                <th>Medio</th>
+                <th>Comprobante</th>
+                <th>Notas</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of pagos">
+                <td>{{ p.fecha | date:'mediumDate' }}</td>
+                <td>${{ p.monto | number:'1.0-0' }}</td>
+                <td>{{ p.medio }}</td>
+                <td>
+                  <a
+                    *ngIf="p.comprobante_url"
+                    class="btn btn-outline-primary btn-sm"
+                    [href]="p.comprobante_url"
+                    target="_blank"
+                  >
+                    Ver
+                  </a>
+                  <span *ngIf="!p.comprobante_url" class="text-muted">No adjunto</span>
+                </td>
+                <td>{{ p.notas || '-' }}</td>
+              </tr>
+              <tr *ngIf="pagos.length===0">
+                <td colspan="5" class="text-center text-muted py-3">No hay pagos aún.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- DOCS -->
+      <div class="pt-3" *ngIf="tab==='docs'">
+        <div class="row g-2 align-items-end">
+          <div class="col-12 col-md-2">
+            <label class="form-label">Tipo</label>
+            <select class="form-select" [(ngModel)]="doc.tipo">
+              <option value="contrato">Contrato firmado</option>
+              <option value="acreditacion">Acreditación</option>
+              <option value="herencia">Herencia</option>
+              <option value="certificado">Certificado</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="form-label">Nombre</label>
+            <input class="form-control" [(ngModel)]="doc.nombre" placeholder="Opcional" />
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="form-label">Archivo</label>
+            <input class="form-control" type="file" (change)="onFileDoc($event)" />
+          </div>
+          <div class="col-12 col-md-2 d-grid">
+            <button type="button" class="btn btn-primary" [disabled]="creando" (click)="subirDoc()">Subir</button>
+          </div>
+        </div>
+
+        <hr />
+
+        <div *ngIf="cargandoDocs">Cargando documentos...</div>
+
+        <div class="table-responsive" *ngIf="!cargandoDocs">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Nombre</th>
+                <th>Archivo</th>
+                <th style="width:120px;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let d of docs">
+                <td>{{ d.tipo }}</td>
+                <td>{{ d.nombre || '-' }}</td>
+                <td>
+                  <a
+                    class="btn btn-outline-primary btn-sm"
+                    *ngIf="d.archivo_url"
+                    [href]="d.archivo_url"
+                    target="_blank"
+                  >
+                    Ver
+                  </a>
+                </td>
+                <td class="text-end">
+                  <button type="button" class="btn btn-outline-danger btn-sm" (click)="eliminarDoc(d.id)">Eliminar</button>
+                </td>
+              </tr>
+              <tr *ngIf="docs.length===0">
+                <td colspan="5" class="text-center text-muted py-3">No hay documentos aún.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CUOTAS -->
+      <div class="pt-3" *ngIf="tab==='cuotas'">
+        <div class="row g-2 align-items-end">
+          <div class="col-6 col-md-3">
+            <label class="form-label">Vencimiento</label>
+            <input class="form-control" type="date" [(ngModel)]="cuota.vencimiento" />
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label">Monto</label>
+            <input class="form-control" type="number" [(ngModel)]="cuota.monto" />
+          </div>
+          <button
+            type="button"
+            class="btn btn-primary"
+            [disabled]="creando || !cuota.vencimiento || !cuota.monto || cuota.monto <= 0"
+            (click)="crearCuota()"
+          >
+            Crear cuota
+          </button>
+        </div>
+
+        <hr />
+
+        <div *ngIf="cargandoCuotas">Cargando cuotas...</div>
+
+        <div class="table-responsive" *ngIf="!cargandoCuotas">
+          <table class="table table-striped align-middle">
+            <thead>
+              <tr>
+                <th>Vencimiento</th>
+                <th>Monto</th>
+                <th>Estado</th>
+                <th style="width:420px;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let c of cuotas">
+                <td>{{ c.vencimiento | date:'mediumDate' }}</td>
+                <td>${{ c.monto | number:'1.0-0' }}</td>
+                <td>
+                  <span class="badge" [ngClass]="c.pagada ? 'text-bg-success' : 'text-bg-warning'">
+                    {{ c.pagada ? 'Pagada' : 'Pendiente' }}
+                  </span>
+                </td>
+
+                <!-- ✅ ACCIONES CUOTA: subir comprobante + marcar pagada + ver -->
+                <td class="text-end">
+                  <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
+
+                    <input
+                      type="file"
+                      class="form-control form-control-sm"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      (change)="onFileCuota($event, c.id)"
+                      [disabled]="creando"
+                      style="max-width: 240px;"
+                    />
+
+                    <button
+                      type="button"
+                      class="btn btn-outline-success btn-sm"
+                      *ngIf="!c.pagada"
+                      [disabled]="creando"
+                      (click)="pagarCuota(c)"
+                    >
+                      Marcar pagada
+                    </button>
+
+                    <a
+                      *ngIf="c.comprobante_url"
+                      class="btn btn-outline-primary btn-sm"
+                      [href]="c.comprobante_url"
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      Ver comprobante
+                    </a>
+
+                    <span *ngIf="!c.comprobante_url" class="text-muted small">No adjunto</span>
+                  </div>
+                </td>
+              </tr>
+
+              <tr *ngIf="cuotas.length===0">
+                <td colspan="4" class="text-center text-muted py-3">No hay cuotas aún.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

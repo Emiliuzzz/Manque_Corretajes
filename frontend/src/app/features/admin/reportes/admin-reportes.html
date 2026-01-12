@@ -1,0 +1,565 @@
+<div class="container-fluid my-4 reportes-container">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2 reportes-header">
+    <div>
+      <h2 class="mb-1">Reportes</h2>
+      <p class="text-muted mb-0">
+        Resumen financiero y operacional de la corredora.
+      </p>
+    </div>
+    <div class="d-flex gap-2">
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        (click)="cargar()"
+        [disabled]="cargando"
+      >
+        <span *ngIf="cargando" class="spinner-border spinner-border-sm me-1"></span>
+        Refrescar
+      </button>
+      <button type="button" class="btn btn-outline-dark" (click)="volverPanel()">
+        Panel admin
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="card shadow-sm filter-card mb-4">
+    <div class="card-body">
+      <div class="row g-3 align-items-end">
+        <div class="col-6 col-md-2">
+          <label class="form-label small text-muted mb-1">Preset</label>
+          <select
+            class="form-select form-select-sm"
+            [(ngModel)]="preset"
+            (change)="onPresetChange()"
+          >
+            <option value="7d">Ultimos 7 dias</option>
+            <option value="30d">Ultimos 30 dias</option>
+            <option value="mes">Este mes</option>
+            <option value="anio">Este ano</option>
+          </select>
+        </div>
+
+        <div class="col-6 col-md-2">
+          <label class="form-label small text-muted mb-1">Desde</label>
+          <input
+            type="date"
+            class="form-control form-control-sm"
+            [(ngModel)]="desde"
+          />
+        </div>
+
+        <div class="col-6 col-md-2">
+          <label class="form-label small text-muted mb-1">Hasta</label>
+          <input
+            type="date"
+            class="form-control form-control-sm"
+            [(ngModel)]="hasta"
+          />
+        </div>
+
+        <div class="col-6 col-md-2">
+          <label class="form-label small text-muted mb-1">Agrupar</label>
+          <select class="form-select form-select-sm" [(ngModel)]="group">
+            <option value="day">Dia</option>
+            <option value="week">Semana</option>
+            <option value="month">Mes</option>
+          </select>
+        </div>
+
+        <div class="col-12 col-md-2">
+          <button
+            class="btn btn-primary btn-sm w-100"
+            (click)="cargar()"
+            [disabled]="cargando"
+          >
+            {{ cargando ? 'Cargando...' : 'Aplicar filtros' }}
+          </button>
+        </div>
+
+        <div class="col-12 col-md-2" *ngIf="data">
+          <div class="period-badge">
+            <span class="text-muted small">{{ data.periodo.desde }} - {{ data.periodo.hasta }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="alert alert-danger mb-4">
+    <strong>Error:</strong> {{ error }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="cargando && !data" class="loading-overlay">
+    <span class="spinner-border spinner-border-sm me-2"></span>
+    Cargando reportes...
+  </div>
+
+  <!-- KPIs Grid -->
+  <div class="row g-3 mb-4" *ngIf="data">
+    <!-- Ingresos total -->
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="card shadow-sm h-100 kpi-card kpi-primary">
+        <div class="card-body text-center">
+          <div class="kpi-title">Ingresos total</div>
+          <div class="kpi-value">{{ moneda(data.kpis.ingresos_total) }}</div>
+          <div class="kpi-sub">{{ numero(data.kpis.pagos_total) }} pagos</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ventas -->
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="card shadow-sm h-100 kpi-card kpi-success">
+        <div class="card-body text-center">
+          <div class="kpi-title">Ventas</div>
+          <div class="kpi-value">{{ moneda(data.kpis.ingresos_ventas) }}</div>
+          <div class="kpi-sub">{{ numero(data.kpis.ventas_activos) }} activos</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arriendo cuotas -->
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="card shadow-sm h-100 kpi-card kpi-info">
+        <div class="card-body text-center">
+          <div class="kpi-title">Arriendo (cuotas)</div>
+          <div class="kpi-value">{{ moneda(data.kpis.ingresos_arriendo_cuotas) }}</div>
+          <div class="kpi-sub">{{ numero(data.kpis.arriendos_activos) }} activos</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arriendo extras -->
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="card shadow-sm h-100 kpi-card kpi-warning">
+        <div class="card-body text-center">
+          <div class="kpi-title">Arriendo (extras)</div>
+          <div class="kpi-value">{{ moneda(data.kpis.ingresos_arriendo_extras) }}</div>
+          <div class="kpi-sub">Pagos manuales</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mora vencida -->
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="card shadow-sm h-100 kpi-card kpi-danger">
+        <div class="card-body text-center">
+          <div class="kpi-title">Mora vencida</div>
+          <div class="kpi-value">{{ moneda(data.mora.vencidas_total) }}</div>
+          <div class="kpi-sub">{{ numero(data.mora.vencidas_count) }} cuotas</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Proximas 7 dias -->
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="card shadow-sm h-100 kpi-card kpi-secondary">
+        <div class="card-body text-center">
+          <div class="kpi-title">Proximas 7 dias</div>
+          <div class="kpi-value">{{ moneda(data.mora.proximas_7d_total) }}</div>
+          <div class="kpi-sub">{{ numero(data.mora.proximas_7d_count) }} cuotas</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reservas Recientes -->
+  <div class="card shadow-sm table-card section-card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <div>
+        <h5 class="mb-0">Reservas Recientes</h5>
+        <p class="text-muted mb-0">Ultimas reservas en el periodo seleccionado</p>
+      </div>
+      <button
+        class="btn btn-sm btn-outline-secondary"
+        (click)="mostrarReservasRecientes = !mostrarReservasRecientes"
+      >
+        {{ mostrarReservasRecientes ? 'Ocultar' : 'Mostrar' }}
+      </button>
+    </div>
+
+    <div *ngIf="mostrarReservasRecientes">
+      <!-- Loading -->
+      <div *ngIf="cargandoReservas" class="text-center py-4 text-muted">
+        <span class="spinner-border spinner-border-sm me-2"></span>
+        Cargando reservas...
+      </div>
+
+      <!-- Empty state -->
+      <div *ngIf="!cargandoReservas && !reservasRecientes.length" class="empty-state">
+        <p class="mb-0">No hay reservas en este periodo.</p>
+      </div>
+
+      <!-- Tabla -->
+      <div class="table-responsive" *ngIf="!cargandoReservas && reservasRecientes.length">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Cliente</th>
+              <th>Propiedad</th>
+              <th>Monto</th>
+              <th>Estado</th>
+              <th>Fecha</th>
+              <th class="text-end" style="width: 100px;">Accion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let r of reservasRecientes"
+              style="cursor: pointer;"
+              (click)="verReservaDetalle(r.id)"
+            >
+              <td>
+                <div class="cell-main">{{ r.interesado?.nombre_completo || '—' }}</div>
+                <div class="cell-sub">{{ r.interesado?.email || '' }}</div>
+              </td>
+              <td>
+                <div class="cell-main">{{ r.propiedad?.titulo || '—' }}</div>
+                <div class="cell-sub" *ngIf="r.propiedad?.codigo">Cod: {{ r.propiedad?.codigo }}</div>
+              </td>
+              <td>
+                <span class="fw-semibold text-success">
+                  {{ moneda(+r.monto_reserva) }}
+                </span>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="badgeClaseReserva(r.estado)">
+                  {{ estadoLabel(r.estado) }}
+                </span>
+              </td>
+              <td class="small text-muted">{{ r.fecha | date:'dd/MM/yyyy' }}</td>
+              <td class="text-end">
+                <button
+                  class="btn btn-sm btn-outline-primary btn-action"
+                  (click)="$event.stopPropagation(); verReservaDetalle(r.id)"
+                >
+                  Ver
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Solicitudes Recientes -->
+  <div class="card shadow-sm table-card section-card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <div>
+        <h5 class="mb-0">Solicitudes Recientes</h5>
+        <p class="text-muted mb-0">Ultimas solicitudes en el periodo seleccionado</p>
+      </div>
+      <button
+        class="btn btn-sm btn-outline-secondary"
+        (click)="mostrarSolicitudesRecientes = !mostrarSolicitudesRecientes"
+      >
+        {{ mostrarSolicitudesRecientes ? 'Ocultar' : 'Mostrar' }}
+      </button>
+    </div>
+
+    <div *ngIf="mostrarSolicitudesRecientes">
+      <!-- Loading -->
+      <div *ngIf="cargandoSolicitudes" class="text-center py-4 text-muted">
+        <span class="spinner-border spinner-border-sm me-2"></span>
+        Cargando solicitudes...
+      </div>
+
+      <!-- Empty state -->
+      <div *ngIf="!cargandoSolicitudes && !solicitudesRecientes.length" class="empty-state">
+        <p class="mb-0">No hay solicitudes en este periodo.</p>
+      </div>
+
+      <!-- Tabla -->
+      <div class="table-responsive" *ngIf="!cargandoSolicitudes && solicitudesRecientes.length">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Cliente</th>
+              <th>Operacion</th>
+              <th>Ubicacion</th>
+              <th>Estado</th>
+              <th>Fecha</th>
+              <th class="text-end" style="width: 100px;">Accion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let s of solicitudesRecientes"
+              style="cursor: pointer;"
+              (click)="verSolicitudDetalle(s.id)"
+            >
+              <td>
+                <div class="cell-main">{{ s.interesado?.nombre_completo || '—' }}</div>
+                <div class="cell-sub">{{ s.interesado?.email || '' }}</div>
+              </td>
+              <td>
+                <div class="cell-main">{{ s.tipo_operacion }}</div>
+                <div class="cell-sub">{{ s.tipo_propiedad }}</div>
+              </td>
+              <td>
+                <div class="cell-main">{{ s.ciudad }}</div>
+                <div class="cell-sub">{{ s.comuna }}</div>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="badgeClaseSolicitud(s.estado)">
+                  {{ estadoLabel(s.estado) }}
+                </span>
+              </td>
+              <td class="small text-muted">{{ s.created_at | date:'dd/MM/yyyy' }}</td>
+              <td class="text-end">
+                <button
+                  class="btn btn-sm btn-outline-primary btn-action"
+                  (click)="$event.stopPropagation(); verSolicitudDetalle(s.id)"
+                >
+                  Ver
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resumen por Estado (Reservas y Solicitudes) -->
+  <div class="card shadow-sm table-card section-card" *ngIf="data">
+    <div class="card-header">
+      <h5 class="mb-0">Resumen por Estado</h5>
+      <p class="text-muted mb-0">Conteo de reservas y solicitudes agrupadas por estado</p>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Tipo</th>
+            <th>Estado</th>
+            <th class="text-center">Cantidad</th>
+            <th class="text-end" style="width: 150px;">Ver lista</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Reservas -->
+          <tr *ngFor="let r of (data.reservas?.por_estado || [])">
+            <td>
+              <span class="badge bg-primary-subtle text-primary">Reserva</span>
+            </td>
+            <td>
+              <span class="badge" [ngClass]="badgeClaseReserva(r.estado)">
+                {{ estadoLabel(r.estado) }}
+              </span>
+            </td>
+            <td class="text-center">
+              <span class="badge bg-light text-dark">{{ numero(r.count) }}</span>
+            </td>
+            <td class="text-end">
+              <button
+                class="btn btn-sm btn-outline-primary btn-action"
+                (click)="verOperacion('reservas', r.estado)"
+              >
+                Ver reservas
+              </button>
+            </td>
+          </tr>
+
+          <!-- Solicitudes -->
+          <tr *ngFor="let s of (data.solicitudes?.por_estado || [])">
+            <td>
+              <span class="badge bg-info-subtle text-info">Solicitud</span>
+            </td>
+            <td>
+              <span class="badge" [ngClass]="badgeClaseSolicitud(s.estado)">
+                {{ estadoLabel(s.estado) }}
+              </span>
+            </td>
+            <td class="text-center">
+              <span class="badge bg-light text-dark">{{ numero(s.count) }}</span>
+            </td>
+            <td class="text-end">
+              <button
+                class="btn btn-sm btn-outline-info btn-action"
+                (click)="verOperacion('solicitudes', s.estado)"
+              >
+                Ver solicitudes
+              </button>
+            </td>
+          </tr>
+
+          <!-- Empty state -->
+          <tr *ngIf="!((data.reservas?.por_estado?.length || 0) + (data.solicitudes?.por_estado?.length || 0))">
+            <td colspan="4" class="empty-state">
+              <p class="mb-0">No hay reservas ni solicitudes en este periodo.</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Morosidad -->
+  <div class="card shadow-sm table-card section-card" *ngIf="data">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <div>
+        <h5 class="mb-0">Morosidad</h5>
+        <p class="text-muted mb-0">Clientes con cuotas vencidas (arriendos vigentes)</p>
+      </div>
+      <button
+        class="btn btn-sm btn-outline-secondary"
+        (click)="mostrarDeudores = !mostrarDeudores"
+      >
+        {{ mostrarDeudores ? 'Ocultar' : 'Mostrar' }}
+      </button>
+    </div>
+
+    <div *ngIf="mostrarDeudores">
+      <!-- Empty state -->
+      <div *ngIf="!data.deudores?.length" class="empty-state">
+        <p class="mb-0">No hay clientes con mora en este periodo.</p>
+      </div>
+
+      <!-- Deudores table -->
+      <div class="table-responsive" *ngIf="data.deudores?.length">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Cliente</th>
+              <th>Propiedad</th>
+              <th class="text-center">Cuotas</th>
+              <th class="text-center">Atraso</th>
+              <th class="text-end">Deuda</th>
+              <th class="text-end" style="width: 130px;">Accion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let d of data.deudores">
+              <td>
+                <div class="cell-main">{{ d.cliente.nombre }}</div>
+                <div class="cell-sub">{{ d.cliente.rut }}</div>
+              </td>
+              <td>
+                <div class="cell-main">{{ d.propiedad.titulo }}</div>
+                <div class="cell-sub">#{{ d.propiedad.id }}</div>
+              </td>
+              <td class="text-center">
+                <span class="badge bg-danger">{{ d.cuotas_vencidas }}</span>
+              </td>
+              <td class="text-center">
+                <span
+                  class="badge"
+                  [ngClass]="{
+                    'text-bg-success': badgeAtraso(d.dias_atraso) === 'ok',
+                    'text-bg-warning': badgeAtraso(d.dias_atraso) === 'warn',
+                    'text-bg-danger': badgeAtraso(d.dias_atraso) === 'danger'
+                  }"
+                >
+                  {{ d.dias_atraso }} dias
+                </span>
+                <div class="cell-sub" *ngIf="d.primera_vencida">
+                  Desde: {{ d.primera_vencida }}
+                </div>
+              </td>
+              <td class="text-end">
+                <span class="fw-bold text-danger">{{ moneda(d.deuda_total) }}</span>
+              </td>
+              <td class="text-end">
+                <button
+                  class="btn btn-sm btn-outline-primary btn-action"
+                  (click)="verContrato(d.contrato_id)"
+                >
+                  Ver contrato
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ingresos en el tiempo -->
+  <div class="card shadow-sm table-card section-card" *ngIf="data">
+    <div class="card-header">
+      <h5 class="mb-0">Ingresos en el periodo</h5>
+      <p class="text-muted mb-0">Serie agrupada por {{ data.periodo.group }}</p>
+    </div>
+    <div class="series-container">
+      <div class="series-row" *ngFor="let it of data.serie_ingresos">
+        <div class="series-label">{{ it.periodo }}</div>
+        <div class="series-bar">
+          <div class="series-fill" [style.width.%]="barraPct(it.total)"></div>
+        </div>
+        <div class="series-value">{{ moneda(it.total) }}</div>
+      </div>
+
+      <div *ngIf="!data.serie_ingresos?.length" class="empty-state">
+        <p class="mb-0">No hay ingresos registrados en este periodo.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Propiedades -->
+  <div class="card shadow-sm table-card section-card" *ngIf="data">
+    <div class="card-header">
+      <h5 class="mb-0">Top propiedades por ingresos</h5>
+      <p class="text-muted mb-0">Top 10 segun pagos registrados en el periodo</p>
+    </div>
+
+    <div class="table-responsive" *ngIf="data.top_propiedades?.length; else noTop">
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Propiedad</th>
+            <th class="text-center">Pagos</th>
+            <th class="text-end">Total</th>
+            <th class="text-end" style="width: 140px;">Accion</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of data.top_propiedades; let i = index">
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <span
+                  class="badge rounded-circle"
+                  [ngClass]="{
+                    'bg-warning text-dark': i === 0,
+                    'bg-secondary': i === 1,
+                    'bg-dark': i === 2,
+                    'bg-light text-dark border': i > 2
+                  }"
+                  style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;"
+                >
+                  {{ i + 1 }}
+                </span>
+                <span class="cell-main">{{ p.titulo }}</span>
+              </div>
+            </td>
+            <td class="text-center">
+              <span class="badge bg-light text-dark">{{ p.pagos }}</span>
+            </td>
+            <td class="text-end">
+              <span class="fw-bold text-success">{{ moneda(p.total) }}</span>
+            </td>
+            <td class="text-end">
+              <button
+                class="btn btn-sm btn-outline-secondary btn-action"
+                (click)="verPropiedad(p.propiedad_id)"
+              >
+                Ver propiedad
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #noTop>
+      <div class="empty-state">
+        <p class="mb-0">No hay datos suficientes para el ranking.</p>
+      </div>
+    </ng-template>
+  </div>
+</div>

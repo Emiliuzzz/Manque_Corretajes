@@ -1,0 +1,199 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { RouterModule, Router } from '@angular/router';
+import {
+  AdminPropiedadesService,
+  AdminPropietario,
+  NuevaPropiedadAdmin,
+} from '../../core/services/admin-propiedades.service';
+
+@Component({
+  standalone: true,
+  selector: 'app-admin-nueva-propiedad',
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  templateUrl: './admin-nueva-propiedad.html',
+})
+export class AdminNuevaPropiedadComponent implements OnInit {
+  propietarios: AdminPropietario[] = [];
+  cargandoPropietarios = false;
+  errorPropietarios: string | null = null;
+
+  formProp!: FormGroup;
+  guardando = false;
+  errorForm: string | null = null;
+  exito = false;
+
+  mostrarFormNuevoPropietario = false;
+  formNuevoProp!: FormGroup;
+  creandoPropietario = false;
+  errorNuevoProp: string | null = null;
+
+  tipos = [
+    { value: 'casa', label: 'Casa' },
+    { value: 'departamento', label: 'Departamento' },
+    { value: 'parcela', label: 'Parcela' },
+    { value: 'oficina', label: 'Oficina' },
+    { value: 'bodega', label: 'Bodega' },
+    { value: 'terreno', label: 'Terreno' },
+  ];
+
+  constructor(
+    private fb: FormBuilder,
+    private adminPropSvc: AdminPropiedadesService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.initFormPropiedad();
+    this.initFormNuevoPropietario();
+    this.cargarPropietarios();
+  }
+
+  private initFormPropiedad(): void {
+    this.formProp = this.fb.group({
+      propietario_id: [null, Validators.required],
+      titulo: ['', [Validators.required, Validators.maxLength(200)]],
+      ciudad: ['', Validators.required],
+      direccion: ['', Validators.required],
+      descripcion: [''],
+      tipo: ['casa', Validators.required],
+      dormitorios: [0, [Validators.min(0)]],
+      baos: [0, [Validators.min(0)]],
+      metros2: [0, [Validators.min(0)]],
+      precio: [0, [Validators.required, Validators.min(0)]],
+    });
+  }
+
+  private initFormNuevoPropietario(): void {
+    this.formNuevoProp = this.fb.group({
+      primer_nombre: ['', Validators.required],
+      segundo_nombre: [''],
+      primer_apellido: ['', Validators.required],
+      segundo_apellido: [''],
+      rut: ['', Validators.required],
+      telefono: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+    });
+  }
+
+  private cargarPropietarios(): void {
+    this.cargandoPropietarios = true;
+    this.errorPropietarios = null;
+
+    this.adminPropSvc.getPropietarios().subscribe({
+      next: (data) => {
+        this.propietarios = data;
+        this.cargandoPropietarios = false;
+      },
+      error: (err) => {
+        console.error(err);
+        this.errorPropietarios =
+          'No se pudieron cargar los propietarios. Intenta nuevamente más tarde.';
+        this.cargandoPropietarios = false;
+      },
+    });
+  }
+
+  // =============== CREAR PROPIEDAD ===============
+  guardarPropiedad(): void {
+    if (this.formProp.invalid) {
+      this.formProp.markAllAsTouched();
+      return;
+    }
+
+    this.guardando = true;
+    this.errorForm = null;
+    this.exito = false;
+
+    const v = this.formProp.value;
+
+    const payload: NuevaPropiedadAdmin = {
+      propietario: v.propietario_id,
+      titulo: v.titulo,
+      direccion: v.direccion,
+      ciudad: v.ciudad,
+      descripcion: v.descripcion || '',
+      tipo: v.tipo,
+      dormitorios: Number(v.dormitorios) || 0,
+      baos: Number(v.baos) || 0,
+      metros2: Number(v.metros2) || 0,
+      precio: Number(v.precio) || 0,
+      estado: 'disponible',
+      estado_aprobacion: 'aprobada', 
+      orientacion : 'sur',
+    };
+
+    this.adminPropSvc.crearPropiedad(payload).subscribe({
+      next: (propCreada) => {
+        this.guardando = false;
+        this.exito = true;
+        // opcional: redirigir al detalle o al admin
+        this.router.navigate(['/admin']);
+      },
+      error: (err) => {
+        console.error(err);
+        this.errorForm =
+          'Ocurrió un error al guardar la propiedad. Revisa los datos o intenta más tarde.';
+        this.guardando = false;
+      },
+    });
+  }
+
+  // =============== NUEVO PROPIETARIO ===============
+  toggleNuevoPropietario(): void {
+    this.mostrarFormNuevoPropietario = !this.mostrarFormNuevoPropietario;
+    if (!this.mostrarFormNuevoPropietario) {
+      this.formNuevoProp.reset();
+      this.errorNuevoProp = null;
+    }
+  }
+
+  crearNuevoPropietario(): void {
+    if (this.formNuevoProp.invalid) {
+      this.formNuevoProp.markAllAsTouched();
+      return;
+    }
+
+    this.creandoPropietario = true;
+    this.errorNuevoProp = null;
+
+    const v = this.formNuevoProp.value;
+
+    this.adminPropSvc
+      .crearPropietario({
+        primer_nombre: v.primer_nombre,
+        segundo_nombre: v.segundo_nombre || '',
+        primer_apellido: v.primer_apellido,
+        segundo_apellido: v.segundo_apellido || '',
+        rut: v.rut,
+        telefono: v.telefono,
+        email: v.email,
+      })
+      .subscribe({
+        next: (nuevo) => {
+          this.creandoPropietario = false;
+          this.mostrarFormNuevoPropietario = false;
+          this.propietarios.push(nuevo);
+          this.formProp.patchValue({ propietario_id: nuevo.id });
+        },
+        error: (err) => {
+          console.error(err);
+          this.errorNuevoProp =
+            'No se pudo crear el propietario. Revisa los datos o intenta más tarde.';
+          this.creandoPropietario = false;
+        },
+      });
+  }
+
+  // helper para template
+  campoInvalido(form: FormGroup, campo: string): boolean {
+    const control = form.get(campo);
+    return !!control && control.invalid && (control.dirty || control.touched);
+  }
+}
