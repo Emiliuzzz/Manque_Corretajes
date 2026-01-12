@@ -19,10 +19,12 @@ import {
   NuevaPropiedadAdmin,
 } from '../../core/services/admin-propiedades.service';
 
+import { AdminPropiedadDocumentosComponent } from './admin-propiedad-documentos';
+
 @Component({
   standalone: true,
   selector: 'app-admin-propiedad-form',
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, AdminPropiedadDocumentosComponent],
   template: `
     <div class="container my-4">
       <h2 class="mb-3">
@@ -295,6 +297,13 @@ import {
           </button>
         </div>
       </form>
+
+      <!-- SECCIÓN DOCUMENTOS (Solo en modo edición) -->
+      <app-admin-propiedad-documentos
+        *ngIf="modoEdicion && propiedadId && !cargando"
+        [propiedadId]="propiedadId"
+      ></app-admin-propiedad-documentos>
+
     </div>
   `,
 })

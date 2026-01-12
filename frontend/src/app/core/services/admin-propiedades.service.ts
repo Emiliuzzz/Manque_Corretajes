@@ -45,14 +45,25 @@ export interface NuevaPropiedadAdmin {
   metros2: number;
   precio: number;
   estado?: string;
-  estado_aprobacion?: EstadoAprobacion;
+  observacion_admin?: string;
   orientacion?: string;
+}
+
+export interface PropiedadDocumento {
+  id: number;
+  propiedad: number;
+  tipo: string;
+  nombre: string;
+  archivo: string; // URL
+  created_at: string;
+  subido_por?: number;
 }
 
 @Injectable({ providedIn: 'root' })
 export class AdminPropiedadesService {
   private apiRoot = environment.apiUrl.replace(/\/+$/, '');
   private apiAdminRoot = `${this.apiRoot}/admin`;
+  private apiDocs = `${this.apiRoot}/propiedad-documentos`; // Endpoint público/común
 
   constructor(private http: HttpClient) {}
 
@@ -113,5 +124,29 @@ export class AdminPropiedadesService {
         return resp?.results ?? resp?.data ?? [];
       })
     );
+  }
+
+  // === DOCUMENTOS ===
+  getDocumentos(propiedadId: number): Observable<PropiedadDocumento[]> {
+    return this.http.get<any>(`${this.apiDocs}/?propiedad=${propiedadId}`).pipe(
+      map((resp) => {
+        if (Array.isArray(resp)) return resp;
+        return resp?.results ?? resp?.data ?? [];
+      })
+    );
+  }
+
+  subirDocumento(propiedadId: number, file: File, tipo: string, nombre: string): Observable<PropiedadDocumento> {
+    const formData = new FormData();
+    formData.append('propiedad', String(propiedadId));
+    formData.append('archivo', file);
+    formData.append('tipo', tipo);
+    formData.append('nombre', nombre || '');
+
+    return this.http.post<PropiedadDocumento>(`${this.apiDocs}/`, formData);
+  }
+
+  eliminarDocumento(docId: number): Observable<any> {
+    return this.http.delete(`${this.apiDocs}/${docId}/`);
   }
 }
