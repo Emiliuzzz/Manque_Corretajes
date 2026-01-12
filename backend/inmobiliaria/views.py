@@ -1,23 +1,23 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, JsonResponse
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 
 from django.db.models import Sum, Count, Q, Exists, OuterRef
 from django.utils.dateparse import parse_date
 
-from rest_framework import viewsets, status, generics, filters, permissions
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework import viewsets, status, filters, permissions
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
 
 
 from .models import *
