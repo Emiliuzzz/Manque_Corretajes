@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, JsonResponse
-from datetime import datetime
+from datetime import datetime, timedelta, date
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 
@@ -14,9 +14,8 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.exceptions import PermissionDenied
-from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework.exceptions import PermissionDenied, ValidationError
+
 
 
 
@@ -288,8 +287,6 @@ class ReservaViewSet(viewsets.ModelViewSet):
             else:
                 qs = qs.filter(estado=estado)
 
-        # (B) rango fecha (por fecha de creación)
-        # Usar datetime con timezone para evitar problemas con MariaDB y __date lookup
         if desde:
             desde_dt = timezone.make_aware(datetime.combine(desde, datetime.min.time()))
             qs = qs.filter(fecha__gte=desde_dt)

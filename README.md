@@ -13,6 +13,17 @@ Para desplegar este sistema en un nuevo entorno (local o servidor), necesitas te
 
 ---
 
+## Nuevas Funcionalidades (v1.1)
+
+Se han implementado mejoras significativas en la gestión de propiedades:
+
+*   **Gestión Unificada de Propiedades:** Ahora, tanto administradores como propietarios pueden gestionar la información general, **fotos** y **documentos** de una propiedad desde una única interfaz de edición.
+*   **Gestión de Documentos:** Posibilidad de subir, visualizar y eliminar documentos asociados a la propiedad (escrituras, certificados, etc.).
+*   **Validación de Fotos:** Se requiere al menos una foto para completar el flujo de publicación de una propiedad.
+*   **Flujo de Creación Mejorado:** Al crear una propiedad, el sistema redirige automáticamente a la pantalla de edición para facilitar la carga inmediata de multimedia y documentación.
+
+---
+
 ## Configuración del Entorno
 
 ### 1. Clonar el Repositorio
@@ -53,6 +64,8 @@ source venv/bin/activate
 ```
 
 #### Instalar dependencias
+
+Es fundamental instalar todas las dependencias, ya que se han añadido nuevas librerías para el manejo de JWT y filtros avanzados.
 
 ```bash
 pip install -r requirements.txt
