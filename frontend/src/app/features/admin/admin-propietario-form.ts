@@ -104,7 +104,7 @@ import {
             class="btn btn-primary"
             [disabled]="guardando"
           >
-            {{ guardando ? 'Guardando...' : (esEdicion ? 'Guardar cambios' : 'Crear') }}
+            {{ guardando ? 'Guardando...' : (esEdicion ? 'Guardar' : 'Crear') }}
           </button>
         </div>
       </form>

@@ -177,7 +177,7 @@ type Orden = 'id_desc' | 'id_asc' | 'precio_desc' | 'precio_asc' | 'ciudad_asc' 
             </thead>
 
             <tbody>
-              <tr *ngFor="let p of pageItems">
+              <tr *ngFor="let p of pageItems" (click)="verDetalle(p.id)" style="cursor: pointer;">
 
                 <td>
                   <div class="fw-semibold">{{ p.titulo }}</div>
@@ -218,7 +218,7 @@ type Orden = 'id_desc' | 'id_asc' | 'precio_desc' | 'precio_asc' | 'ciudad_asc' 
                   <button
                     *ngIf="p.estado_aprobacion === 'pendiente'"
                     class="btn btn-sm btn-success me-2"
-                    (click)="cambiarAprobacion(p, 'aprobada')"
+                    (click)="$event.stopPropagation(); cambiarAprobacion(p, 'aprobada')"
                   >
                     Aprobar
                   </button>
@@ -226,7 +226,7 @@ type Orden = 'id_desc' | 'id_asc' | 'precio_desc' | 'precio_asc' | 'ciudad_asc' 
                   <button
                     *ngIf="p.estado_aprobacion === 'pendiente'"
                     class="btn btn-sm btn-danger me-2"
-                    (click)="cambiarAprobacion(p, 'rechazada')"
+                    (click)="$event.stopPropagation(); cambiarAprobacion(p, 'rechazada')"
                   >
                     Rechazar
                   </button>
@@ -235,17 +235,11 @@ type Orden = 'id_desc' | 'id_asc' | 'precio_desc' | 'precio_asc' | 'ciudad_asc' 
                     class="btn btn-sm btn-outline-primary me-2"
                     [routerLink]="['/propietario/propiedad', p.id, 'fotos']"
                     [queryParams]="{ returnUrl: '/admin/propiedades' }"
+                    (click)="$event.stopPropagation()"
                   >
                     {{ p.tiene_fotos ? 'Gestionar fotos' : 'Subir fotos' }}
                   </button>
 
-
-                  <button
-                    class="btn btn-sm btn-outline-secondary"
-                    (click)="verDetalle(p.id)"
-                  >
-                    Ver / editar
-                  </button>
                   <button
                     class="btn btn-sm btn-outline-dark me-2"
                     (click)="$event.stopPropagation(); verHistorial(p.id)"

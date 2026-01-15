@@ -218,7 +218,7 @@ import {
                 </button>
 
                 <button type="submit" class="btn btn-primary" [disabled]="guardando">
-                  {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
+                  {{ guardando ? 'Guardando...' : 'Guardar' }}
                 </button>
               </div>
             </div>

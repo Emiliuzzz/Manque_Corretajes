@@ -98,10 +98,10 @@
     Cargando reportes...
   </div>
 
-  <!-- KPIs Grid -->
-  <div class="row g-3 mb-4" *ngIf="data">
+  <!-- KPIs Grid Row 1 -->
+  <div class="row g-3 mb-3" *ngIf="data">
     <!-- Ingresos total -->
-    <div class="col-6 col-md-4 col-lg-2">
+    <div class="col-12 col-md-4">
       <div class="card shadow-sm h-100 kpi-card kpi-primary">
         <div class="card-body text-center">
           <div class="kpi-title">Ingresos total</div>
@@ -112,7 +112,7 @@
     </div>
 
     <!-- Ventas -->
-    <div class="col-6 col-md-4 col-lg-2">
+    <div class="col-12 col-md-4">
       <div class="card shadow-sm h-100 kpi-card kpi-success">
         <div class="card-body text-center">
           <div class="kpi-title">Ventas</div>
@@ -123,7 +123,7 @@
     </div>
 
     <!-- Arriendo cuotas -->
-    <div class="col-6 col-md-4 col-lg-2">
+    <div class="col-12 col-md-4">
       <div class="card shadow-sm h-100 kpi-card kpi-info">
         <div class="card-body text-center">
           <div class="kpi-title">Arriendo (cuotas)</div>
@@ -132,9 +132,12 @@
         </div>
       </div>
     </div>
+  </div>
 
+  <!-- KPIs Grid Row 2 -->
+  <div class="row g-3 mb-4" *ngIf="data">
     <!-- Arriendo extras -->
-    <div class="col-6 col-md-4 col-lg-2">
+    <div class="col-12 col-md-4">
       <div class="card shadow-sm h-100 kpi-card kpi-warning">
         <div class="card-body text-center">
           <div class="kpi-title">Arriendo (extras)</div>
@@ -145,7 +148,7 @@
     </div>
 
     <!-- Mora vencida -->
-    <div class="col-6 col-md-4 col-lg-2">
+    <div class="col-12 col-md-4">
       <div class="card shadow-sm h-100 kpi-card kpi-danger">
         <div class="card-body text-center">
           <div class="kpi-title">Mora vencida</div>
@@ -156,7 +159,7 @@
     </div>
 
     <!-- Proximas 7 dias -->
-    <div class="col-6 col-md-4 col-lg-2">
+    <div class="col-12 col-md-4">
       <div class="card shadow-sm h-100 kpi-card kpi-secondary">
         <div class="card-body text-center">
           <div class="kpi-title">Proximas 7 dias</div>

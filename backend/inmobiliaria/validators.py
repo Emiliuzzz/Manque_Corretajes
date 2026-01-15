@@ -72,7 +72,7 @@ def validar_telefono_cl(value):
         raise ValidationError("Teléfono inválido. Formato requerido: +56912345678.")
     
 
-def validar_imagen(imagen, max_mb=8, min_w=640, min_h=480):
+def validar_imagen(imagen, max_mb=8, min_w=100, min_h=100):
     if imagen.size > max_mb * 1024 * 1024:
         raise ValidationError(f'La imagen supera {max_mb}MB.')
     img = Image.open(imagen)

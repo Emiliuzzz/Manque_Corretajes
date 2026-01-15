@@ -42,7 +42,7 @@ import {
           </select>
 
           <button class="btn btn-sm btn-primary" (click)="guardarEstado()" [disabled]="guardandoEstado">
-            Guardar estado
+            Guardar
           </button>
         </div>
       </div>

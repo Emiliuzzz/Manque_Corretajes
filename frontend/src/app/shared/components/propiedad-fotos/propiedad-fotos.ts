@@ -143,7 +143,11 @@ export class PropiedadFotosComponent implements OnInit, OnChanges {
       },
       error: (err) => {
         console.error(err);
-        this.error = 'Error al subir la foto.';
+        if (err.error && err.error.foto) {
+          this.error = Array.isArray(err.error.foto) ? err.error.foto[0] : err.error.foto;
+        } else {
+          this.error = 'Error al subir la foto.';
+        }
         this.subiendo = false;
       }
     });

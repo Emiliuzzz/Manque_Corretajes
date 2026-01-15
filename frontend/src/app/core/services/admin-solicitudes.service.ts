@@ -42,8 +42,16 @@ export interface AdminSolicitud {
 
 type ApiAdminSolicitud = Omit<AdminSolicitud, 'interesado' | 'created_at'> & {
   interesado: AdminSolicitud['interesado'];
-  creada: string;
+  created_at: string;
 };
+
+export interface SolicitudesKPI {
+  total: number;
+  nuevas: number;
+  en_proceso: number;
+  respondidas: number;
+  cerradas: number;
+}
 
 @Injectable({ providedIn: 'root' })
 export class AdminSolicitudesService {
@@ -51,6 +59,10 @@ export class AdminSolicitudesService {
   private apiAdminRoot = `${this.apiRoot}/admin`;
 
   constructor(private http: HttpClient) {}
+
+  getKPIs(): Observable<SolicitudesKPI> {
+    return this.http.get<SolicitudesKPI>(`${this.apiAdminRoot}/solicitudes/kpis/`);
+  }
 
   private mapEstadoParam(estado: string): string {
     if (!estado) return 'TODAS';
@@ -70,7 +82,7 @@ export class AdminSolicitudesService {
     return {
       ...s,
       interesado: s.interesado ?? null,
-      created_at: s.creada,
+      created_at: s.created_at,
     };
   }
 

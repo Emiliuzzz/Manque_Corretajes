@@ -73,7 +73,7 @@ import {
       </div>
 
       <div class="table-responsive" *ngIf="!cargando && !error && usuarios.length > 0">
-        <table class="table table-striped align-middle">
+        <table class="table table-striped align-middle table-hover">
           <thead class="table-light">
             <tr>
               <th>Cuenta</th>
@@ -81,12 +81,11 @@ import {
               <th>Activo</th>
               <th>Aprobado</th>
               <th>Perfil</th>
-              <th class="text-end">Acciones</th>
             </tr>
           </thead>
 
           <tbody>
-            <tr *ngFor="let u of usuarios">
+            <tr *ngFor="let u of usuarios" (click)="editar(u.id)" style="cursor: pointer;">
               <td>
                 <div class="fw-semibold">{{ u.email || u.username }}</div>
                 <div class="text-muted small">username: {{ u.username }}</div>
@@ -113,11 +112,6 @@ import {
                 <ng-template #sinPerfil>
                   <span class="text-muted small">Sin perfil asociado</span>
                 </ng-template>
-              </td>
-              <td class="text-end">
-                <button class="btn btn-sm btn-outline-secondary" (click)="editar(u.id)">
-                  Ver / editar
-                </button>
               </td>
             </tr>
           </tbody>

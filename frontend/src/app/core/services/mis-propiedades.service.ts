@@ -281,6 +281,11 @@ export class MisPropiedadesService {
     );
   }
 
+  subirDocumento(propiedadId: number, formData: FormData): Observable<PropiedadDocumento> {
+    formData.append('propiedad', String(propiedadId));
+    return this.http.post<PropiedadDocumento>(`${this.baseUrl}/propiedad-documentos/`, formData);
+  }
+
   // --- Perfil ---
   getMiPerfilPropietario() {
     return this.http.get<PerfilPropietario>(`${this.baseUrl}/propietario/mi-perfil/`);

@@ -293,7 +293,7 @@ import { PropiedadFotosComponent } from '../../shared/components/propiedad-fotos
             {{
               guardando
                 ? (modoEdicion ? 'Guardando...' : 'Guardando...')
-                : (modoEdicion ? 'Guardar cambios' : 'Crear propiedad')
+                : (modoEdicion ? 'Guardar' : 'Crear propiedad')
             }}
           </button>
         </div>

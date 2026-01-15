@@ -20,6 +20,7 @@ from .views import (
 
     # Solicitudes (NUEVO FLUJO)
     admin_solicitudes_list,
+    admin_solicitudes_kpis,
     admin_solicitud_detalle,
     admin_solicitud_cambiar_estado,
     admin_solicitud_agregar_nota,
@@ -67,6 +68,7 @@ urlpatterns = [
     # =====================
     # SOLICITUDES (CLIENTES)
     # =====================
+    path("solicitudes/kpis/", admin_solicitudes_kpis),
     path("solicitudes/", admin_solicitudes_list),
     path("solicitudes/<int:pk>/", admin_solicitud_detalle),
     path("solicitudes/<int:pk>/cambiar-estado/", admin_solicitud_cambiar_estado),

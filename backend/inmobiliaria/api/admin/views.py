@@ -512,6 +512,27 @@ def admin_reserva_cambiar_estado(request, pk):
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
+def admin_solicitudes_kpis(request):
+    user = request.user
+    if not _es_admin(user):
+        return Response({"detail": "No autorizado."}, status=status.HTTP_403_FORBIDDEN)
+
+    total = SolicitudCliente.objects.count()
+    nuevas = SolicitudCliente.objects.filter(estado="nueva").count()
+    proceso = SolicitudCliente.objects.filter(estado="en_proceso").count()
+    respondidas = SolicitudCliente.objects.filter(estado="respondida").count()
+    cerradas = SolicitudCliente.objects.filter(estado="cerrada").count()
+
+    return Response({
+        "total": total,
+        "nuevas": nuevas,
+        "en_proceso": proceso,
+        "respondidas": respondidas,
+        "cerradas": cerradas,
+    }, status=status.HTTP_200_OK)
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def admin_solicitudes_list(request):
     user = request.user
     if not _es_admin(user):

@@ -50,7 +50,7 @@ type EstadoReserva = 'pendiente' | 'confirmada' | 'cancelada' | 'expirada';
 
 
           <button class="btn btn-sm btn-primary" (click)="guardarEstado()" [disabled]="guardandoEstado">
-            Guardar estado
+            Guardar
           </button>
         </div>
       </div>

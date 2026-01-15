@@ -106,13 +106,6 @@ export const routes: Routes = [
       },
 
       {
-        path: 'propietarios',
-        loadComponent: () =>
-          import('./features/admin/admin-propietarios-list').then(
-            (m) => m.AdminPropietariosListComponent
-          ),
-      },
-      {
         path: 'propietarios/nuevo',
         loadComponent: () =>
           import('./features/admin/admin-propietario-form').then(

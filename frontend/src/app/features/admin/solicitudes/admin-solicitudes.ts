@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import {
   AdminSolicitudesService,
   AdminSolicitud,
+  SolicitudesKPI,
 } from '../../../core/services/admin-solicitudes.service';
 
 type FiltroEstado = 'TODAS' | 'nueva' | 'en_proceso' | 'respondida' | 'cerrada';
@@ -40,13 +41,57 @@ type FiltroEstado = 'TODAS' | 'nueva' | 'en_proceso' | 'respondida' | 'cerrada';
         </div>
       </div>
 
+      <!-- KPIs -->
+      <div class="row g-2 mt-3 mb-4" *ngIf="kpi">
+        <div class="col-12 col-md-2">
+          <div class="card shadow-sm h-100" style="cursor:pointer;" (click)="cambiarFiltro('TODAS')">
+            <div class="card-body py-2 text-center">
+              <div class="text-muted small">Total</div>
+              <div class="h4 mb-0 fw-bold">{{ kpi.total }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-2">
+          <div class="card shadow-sm h-100 border-success" style="cursor:pointer;" (click)="cambiarFiltro('nueva')">
+            <div class="card-body py-2 text-center">
+              <div class="text-success small fw-semibold">Nuevas</div>
+              <div class="h4 mb-0 text-success">{{ kpi.nuevas }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-2">
+          <div class="card shadow-sm h-100 border-warning" style="cursor:pointer;" (click)="cambiarFiltro('en_proceso')">
+            <div class="card-body py-2 text-center">
+              <div class="text-warning small fw-semibold">En proceso</div>
+              <div class="h4 mb-0 text-warning">{{ kpi.en_proceso }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-2">
+          <div class="card shadow-sm h-100 border-info" style="cursor:pointer;" (click)="cambiarFiltro('respondida')">
+            <div class="card-body py-2 text-center">
+              <div class="text-info small fw-semibold">Respondidas</div>
+              <div class="h4 mb-0 text-info">{{ kpi.respondidas }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-2">
+          <div class="card shadow-sm h-100 border-secondary" style="cursor:pointer;" (click)="cambiarFiltro('cerrada')">
+            <div class="card-body py-2 text-center">
+              <div class="text-secondary small fw-semibold">Cerradas</div>
+              <div class="h4 mb-0 text-secondary">{{ kpi.cerradas }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Mensajes -->
       <div *ngIf="cargando" class="alert alert-info">Cargando solicitudes...</div>
       <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
 
       <!-- Filtros + búsqueda -->
       <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
-        <span class="me-2 fw-semibold">Estado:</span>
+        <span class="me-2 fw-semibold">Filtro Estado:</span>
 
         <button type="button" class="btn btn-sm"
           [ngClass]="{'btn-primary': filtroEstado==='TODAS','btn-outline-primary': filtroEstado!=='TODAS'}"
@@ -110,7 +155,6 @@ type FiltroEstado = 'TODAS' | 'nueva' | 'en_proceso' | 'respondida' | 'cerrada';
               <th>Presupuesto</th>
               <th>Estado</th>
               <th>Fecha</th>
-              <th style="width: 1%"></th>
             </tr>
           </thead>
 
@@ -152,15 +196,6 @@ type FiltroEstado = 'TODAS' | 'nueva' | 'en_proceso' | 'respondida' | 'cerrada';
 
               <td class="small">{{ s.created_at | date:'short' }}</td>
 
-              <td>
-                <button
-                  type="button"
-                  class="btn btn-sm btn-outline-primary"
-                  (click)="$event.stopPropagation(); verDetalle(s)"
-                >
-                  Ver
-                </button>
-              </td>
             </tr>
           </tbody>
         </table>
@@ -176,6 +211,13 @@ export class AdminSolicitudesComponent implements OnInit {
   solicitudes: AdminSolicitud[] = [];
   cargando = false;
   error: string | null = null;
+  kpi: SolicitudesKPI | null = {
+    total: 0,
+    nuevas: 0,
+    en_proceso: 0,
+    respondidas: 0,
+    cerradas: 0
+  };
 
   filtroEstado: FiltroEstado = 'TODAS';
   search = '';
@@ -195,6 +237,8 @@ export class AdminSolicitudesComponent implements OnInit {
   ngOnInit(): void {
     // Lee query params (cuando vienes desde reportes)
     this.route.queryParams.subscribe((qp) => {
+      this.cargarKPIs(); // Recargar KPIs al navegar/volver
+
       this.returnTo = (qp['returnTo'] || '').trim() || null;
 
       const estadoQP = (qp['estado'] || '').trim();
@@ -209,6 +253,17 @@ export class AdminSolicitudesComponent implements OnInit {
       this.cargar();
     });
   }
+
+  cargarKPIs(): void {
+    this.svc.getKPIs().subscribe({
+      next: (k) => {
+        console.log('KPIs cargados:', k);
+        this.kpi = k;
+      },
+      error: (e) => console.error('Error cargando KPIs:', e),
+    });
+  }
+
 
   private mapEstadoToFiltro(estado: string): FiltroEstado {
     // estado puede venir como 'nueva' o 'NUEVAS' dependiendo de quién navega
